@@ -149,7 +149,17 @@ footer.foot{ padding:14px 20px 26px; color:var(--muted); font-size:13px; text-al
 .expl-list li{ padding:7px 10px; border-radius:8px; background:var(--panel2); border-left:4px solid var(--navy); font-size:14px; }
 .expl-list li.good{ border-left-color:var(--good); } .expl-list li.warn{ border-left-color:var(--amber); } .expl-list li.alarm{ border-left-color:var(--red); }
 .fence svg{ width:100%; height:auto; display:block; border-radius:8px; }
-.setup svg{ width:100%; max-width:300px; height:auto; display:block; margin:0 auto 8px; }
+.setup svg{ width:100%; max-width:440px; height:auto; display:block; margin:0 auto 8px; }
+.fence-ex{ margin:0 0 10px; }
+.fence-ex summary{ cursor:pointer; font-weight:700; color:var(--navy); font-size:14px; margin-bottom:6px; }
+.fence-ex .ttl{ text-align:center; font-weight:700; font-size:14px; margin:2px 0 8px; }
+.fence-ex .panels{ display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:8px; }
+.fence-ex figure{ margin:0; display:flex; flex-direction:column; gap:6px; }
+.fence-ex figure svg{ width:100%; height:auto; display:block; border-radius:8px; }
+.fence-ex figcaption{ background:var(--panel2); border:1px solid var(--line); border-radius:8px; padding:7px 9px; font-size:12.5px; line-height:1.35; flex:1; }
+.fence-ex figcaption b{ display:block; font-size:13px; margin-bottom:2px; }
+.fence-ex .tag{ display:inline-block; margin-top:5px; font-weight:700; font-size:12px; padding:1px 8px; border-radius:10px; color:var(--panel); }
+.fence-ex .tag.lo{ background:var(--red); } .fence-ex .tag.ok{ background:var(--good); } .fence-ex .tag.hi{ background:var(--amber); }
 .setup-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
 @media (max-width:520px){ .setup-grid{ grid-template-columns:1fr; } }
 .setup fieldset{ border:1px solid var(--line); border-radius:8px; padding:8px 10px; margin:0; }
@@ -313,7 +323,7 @@ dialog::backdrop{ background:rgba(5,12,20,.5); }
       <div class="stack" id="sidePanel">
         <section class="card setup" id="setupCard" hidden></section>
         <section class="card" id="explCard"><h2>What just happened</h2><div class="muted small" id="lastAdj" style="margin-bottom:8px"></div><ul class="expl-list" id="explList"></ul><p class="muted" id="explOff" hidden style="margin:0">Explanations are off.</p></section>
-        <section class="card fence" id="fenceCard"><h2>Sensing: the fence</h2><p class="muted small" style="margin:0 0 6px">The sensitivity setting is a fence. The pacemaker only “sees” what is taller than the fence. Lower fence (smaller mV) = sees more = <b>more sensitive</b>. Higher fence (larger mV) = sees less = <b>less sensitive</b>.</p><div id="fenceA"></div><div id="fenceV" style="margin-top:8px"></div></section>
+        <section class="card fence" id="fenceCard"><h2>Sensing: the fence</h2><p class="muted small" style="margin:0 0 6px">The sensitivity setting is a fence. The pacemaker only “sees” what is taller than the fence. Lower fence (smaller mV) = sees more = <b>more sensitive</b>. Higher fence (larger mV) = sees less = <b>less sensitive</b>.</p><details class="fence-ex" id="fenceEx" open></details><div id="fenceA"></div><div id="fenceV" style="margin-top:8px"></div></section>
         <section class="card" id="bedsideCard"><h2>Bedside actions</h2><div class="row" id="bedsideBtns"></div><p class="muted small" style="margin:8px 0 0">Actions are recorded.</p></section>
       </div>
     </div>
@@ -1703,8 +1713,7 @@ function fenceSVG(ch) {
   const tree = (x, h) => `<rect x="${x - 3}" y="${y(h) + 8}" width="6" height="${base - y(h) - 8}" fill="#6B4E2E"/><ellipse cx="${x}" cy="${y(h) + 8}" rx="13" ry="12" fill="#2E7D57"/>`;
   const bushes = x => bush > 0 ? `<ellipse cx="${x}" cy="${y(bush) + 6}" rx="12" ry="${Math.max(4, (base - y(bush)) / 2 + 2)}" fill="#7BB27A"/>` : '';
   let grass = ''; if (noise > 0) for (let x = 6; x < W - 6; x += 7) grass += `<path d="M${x} ${base} l2 ${-(base - y(noise))} l2 ${base - y(noise)}" fill="#A8C77B"/>`;
-  let fence = '';
-  if (set !== 'ASYNC') { const fy = y(set); for (let x = 4; x < W; x += 14) fence += `<rect x="${x}" y="${fy}" width="6" height="${base - fy}" fill="#B98A5A" stroke="#7A5530" stroke-width=".8"/>`; fence += `<rect x="0" y="${fy + 4}" width="${W}" height="4" fill="#9C6F42"/>`; }
+  const fence = set === 'ASYNC' ? '' : pickets(W, y(set), base, 10);
   const seen = conn !== 'open' && set !== 'ASYNC' && amp >= set;
   const label = conn === 'open' ? 'circuit open: nothing reaches the pacemaker' : set === 'ASYNC' ? 'ASYNC: no fence, sensing is off' : seen ? `fence ${fmtSens(set)} mV: the pacemaker sees the ${A ? 'P waves' : 'QRS complexes'}` : `fence ${fmtSens(set)} mV: ${A ? 'P waves' : 'QRS complexes'} are hidden (undersensing)`;
   const over = set !== 'ASYNC' && conn !== 'open' && ((bush && bush >= set) || (noise && noise >= set));
@@ -1715,6 +1724,47 @@ function fenceSVG(ch) {
     <text x="8" y="${H + 12}" font-family="Arial" font-size="11.5" fill="${over ? '#8A3E00' : seen ? '#1D5A3C' : '#8A3E00'}">${esc(over ? `fence ${fmtSens(set)} mV is low enough to see ${bush >= set ? 'T waves (bushes)' : 'noise (grass)'}: oversensing` : label)}</text></svg>`;
 }
 function renderFence() { if ($('fenceCard').hidden) return; $('fenceA').innerHTML = fenceSVG('A'); $('fenceV').innerHTML = fenceSVG('V'); }
+const PICKET_COLORS = ['#FFB4A2', '#FFD6A5', '#B9E4C9', '#A0C4FF', '#CDB4DB'];
+function pickets(W, top, base, w) {
+  const step = w + 4, rail = top + (base - top) * 0.4;
+  let s = `<rect x="0" y="${rail.toFixed(1)}" width="${W}" height="5" rx="2" fill="#E2C49C"/>`;
+  for (let i = 0, x = 2; x < W; i++, x += step) {
+    const r = Math.min(w / 2, (base - top) / 2);
+    s += `<path d="M${x} ${base}V${(top + r).toFixed(1)}Q${x} ${top.toFixed(1)} ${x + w / 2} ${top.toFixed(1)}Q${x + w} ${top.toFixed(1)} ${x + w} ${(top + r).toFixed(1)}V${base}Z" fill="${PICKET_COLORS[i % PICKET_COLORS.length]}" stroke="rgba(70,45,30,.35)"/>`;
+  }
+  return s;
+}
+// Static teaching panels: fence too high / just right / too low (ventricular example).
+function fenceExplainer() {
+  const B = 118, ecg = 'M0 118L62 118L68 123L80 26L92 126L98 118L118 118C128 118 132 94 144 94C156 94 160 118 170 118L200 118';
+  const face = mood => {
+    const eyes = mood === 'dizzy' ? '<path d="M25 133l4 4m0-4l-4 4M35 133l4 4m0-4l-4 4" stroke="#1E2A36" stroke-width="1.6"/>' : '<circle cx="27" cy="135" r="2" fill="#1E2A36"/><circle cx="37" cy="135" r="2" fill="#1E2A36"/>';
+    const mouth = mood === 'happy' ? '<path d="M26 141q6 6 12 0" fill="none" stroke="#1E2A36" stroke-width="1.6" stroke-linecap="round"/>'
+      : mood === 'dizzy' ? '<circle cx="32" cy="144" r="2.6" fill="none" stroke="#1E2A36" stroke-width="1.5"/>'
+      : '<path d="M27 144q2.5-2 5 0t5 0" fill="none" stroke="#1E2A36" stroke-width="1.5" stroke-linecap="round"/>';
+    const bubble = mood === 'confused' ? '<text x="58" y="138" font-size="18" font-weight="700" font-family="Arial" fill="#BF5700">?</text>' : mood === 'dizzy' ? '<text x="58" y="138" font-size="18" font-weight="700" font-family="Arial" fill="#BF5700">!</text>' : '<path d="M56 130l3 3 6-7" fill="none" stroke="#2E7D57" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>';
+    return `<rect x="14" y="123" width="36" height="32" rx="6" fill="#D7DCE1" stroke="#4A545E" stroke-width="1.3"/><rect x="19" y="120" width="7" height="4" fill="#2F6FD6"/><rect x="38" y="120" width="7" height="4" fill="#fff" stroke="#4A545E" stroke-width=".6"/><rect x="19" y="128" width="26" height="22" rx="3" fill="#EAF4EF"/>${eyes}${mouth}${bubble}`;
+  };
+  const panel = (top, mood, hidden, title, text, tag, cls, alt) => `<figure>
+    <svg viewBox="0 0 200 160" role="img" aria-label="${alt}">
+      <rect width="200" height="${B}" fill="#E4F3FF"/><circle cx="178" cy="20" r="9" fill="#FFD45C"/><rect y="${B}" width="200" height="42" fill="#BFE3A6"/>
+      <path d="${ecg}" fill="none" stroke="#233A6B" stroke-width="3.2" stroke-linejoin="round"/>
+      ${pickets(200, top, B, 16)}
+      ${hidden ? `<path d="M68 123L80 26L92 126" fill="none" stroke="#233A6B" stroke-width="1.6" stroke-dasharray="4 3" opacity=".45"/>` : ''}
+      <text x="80" y="${hidden ? 10 : 18}" text-anchor="middle" font-size="12" font-weight="700" font-family="Arial" fill="#233A6B">QRS${hidden ? ' (hidden)' : ''}</text>
+      ${top > 94 ? '<text x="144" y="84" text-anchor="middle" font-size="11" font-weight="700" font-family="Arial" fill="#233A6B">T wave</text>' : ''}
+      ${face(mood)}
+    </svg>
+    <figcaption><b>${title}</b>${text}<br><span class="tag ${cls}">${tag}</span></figcaption></figure>`;
+  return `<summary>How the fence works (ventricular example)</summary>
+    <div class="ttl">The fence is the mV setting on your pacemaker</div>
+    <div class="panels">
+      ${panel(12, 'confused', true, 'Fence too high (mV too big)', 'The pacemaker can’t see the child’s own QRS, so it paces even when the heart is beating on its own (undersensing). Pacing can land on a T wave.', 'Low sensitivity', 'lo', 'Fence taller than the QRS: the pacemaker cannot see the heartbeat.')}
+      ${panel(70, 'happy', false, 'Fence just right', 'It sees every QRS but not the T waves or P waves, so it paces only when the heart doesn’t beat on its own.', 'Just right', 'ok', 'Fence between the T wave and the top of the QRS: only the QRS is seen.')}
+      ${panel(100, 'dizzy', false, 'Fence too low (mV too small)', 'It sees the QRS, but also T waves, P waves and wiggles from a squirmy or crying child. It mistakes them for heartbeats and holds back pacing when it should pace (oversensing).', 'High sensitivity', 'hi', 'Fence lower than the T wave: the pacemaker also sees T waves and mistakes them for beats.')}
+    </div>`;
+}
+$('fenceEx').innerHTML = fenceExplainer();
 
 /* ---------- keyboard entry ---------- */
 const KBD = [
@@ -1777,18 +1827,59 @@ function bedsideAction(kind) {
 }
 
 /* ---------- wire identification and connection (competency form steps 3–4) ---------- */
+// Frontal view of a child's chest: the patient's right is on the viewer's left. In 'teach' mode the heart and
+// labels are shown; otherwise only the skin exit sites are drawn so the diagram does not give away the answer.
+function chestSVG(cfg) {
+  const teach = cfg.mode === 'teach', bip = cfg.kind === 'bipolar', F = 'font-family="Arial"';
+  const coil = (x1, y1, x2, y2) => {
+    const dx = x2 - x1, dy = y2 - y1, L = Math.hypot(dx, dy), nx = -dy / L, ny = dx / L; let d = '';
+    for (let i = 0; i <= 60; i++) { const f = i / 60, o = Math.sin(f * Math.PI * 14) * 4 * Math.min(1, f * 8, (1 - f) * 8); d += `${i ? 'L' : 'M'}${(x1 + dx * f + nx * o).toFixed(1)} ${(y1 + dy * f + ny * o).toFixed(1)}`; }
+    return `<path d="${d}" fill="none" stroke="#8C959E" stroke-width="2.6" stroke-linejoin="round"/>`;
+  };
+  const wire = (ax, ay, ex, ey) => teach
+    ? `<path d="M${ax} ${ay} C${ax} ${ay + 30} ${ex} ${ey - 30} ${ex} ${ey}" fill="none" stroke="#25292E" stroke-width="2.2"/><circle cx="${ax}" cy="${ay}" r="3.4" fill="#25292E"/>`
+    : `<circle cx="${ex}" cy="${ey - 14}" r="2.4" fill="#8A4A3A"/><path d="M${ex} ${ey - 14} L${ex} ${ey}" stroke="#25292E" stroke-width="2.2"/>`;
+  const clip = (x, y) => `<rect x="${x - 15}" y="${y}" width="30" height="9" rx="2" fill="#E3E8EC" stroke="#4A545E" stroke-width="1.2"/><path d="M${x - 9} ${y + 4.5}h5M${x - 6.5} ${y + 2}v5M${x + 5} ${y + 4.5}h5" stroke="#4A545E" stroke-width="1.2"/>`;
+  const lbl = (x, y, a, t1, t2) => `<text x="${x}" y="${y}" text-anchor="${a}" font-size="13" font-weight="700" ${F} fill="#1E2A36">${t1}</text>` + (t2 ? `<text x="${x}" y="${y + 14}" text-anchor="${a}" font-size="10.5" ${F} fill="#4A5763">${t2}</text>` : '');
+  const lead = (x1, y1, x2, y2) => `<path d="M${x1} ${y1} L${x2} ${y2}" stroke="#1E2A36" stroke-width="1.1"/>`;
+  // Drawing is in a 360-wide frame shifted into a 440x360 canvas so the labels sit outside the chest.
+  return `<svg viewBox="0 0 440 360" role="img" aria-label="${teach
+      ? `Frontal view of a child’s chest. Atrial wires attach to the right atrium and exit to the patient’s right of the sternum (viewer’s left)${bip ? '; ventricular wires attach to the ventricle and exit to the patient’s left' : '; a skin ground wire is on the patient’s left'}. Pacing cables connect them to the temporary pacemaker.`
+      : `Frontal view of a child’s chest. Pair 1 exits to the patient’s right of the sternum (viewer’s left)${bip ? '; pair 2 exits to the patient’s left' : '; a skin ground wire is on the patient’s left'}.`}">
+    <rect width="440" height="360" rx="10" fill="#F4F8FB"/>
+    <text x="10" y="20" font-size="12" font-weight="700" ${F} fill="#2F5496">◀ Patient’s RIGHT</text><text x="430" y="20" text-anchor="end" font-size="12" font-weight="700" ${F} fill="#2F5496">Patient’s LEFT ▶</text>
+    <g transform="translate(40 30)">
+    <path d="M156 14 L156 44 C128 50 86 54 66 74 C52 90 50 124 56 164 L64 232 L296 232 L304 164 C310 124 308 90 294 74 C274 54 232 50 204 44 L204 14 Z" fill="#F7D9C8" stroke="#C98A72" stroke-width="1.6"/>
+    <path d="M180 64 L180 176" stroke="#E7B9A4" stroke-width="7" stroke-linecap="round"/>
+    ${teach ? `<g transform="translate(200 140) scale(.85) translate(-200 -140)">
+      <path d="M152 104 L152 58" stroke="#C9384C" stroke-width="10" stroke-linecap="round"/><path d="M182 102 C180 80 186 66 206 62 L222 62" fill="none" stroke="#C9384C" stroke-width="10" stroke-linecap="round"/>
+      <path d="M170 98 C204 84 244 98 248 128 C252 158 226 184 208 198 C196 190 172 168 166 142 C162 122 160 106 170 98Z" fill="#EE8A99" stroke="#B23A4E" stroke-width="1.8"/>
+      <path d="M196 112 C204 132 206 156 204 180M218 108 C222 124 226 140 236 150" fill="none" stroke="#C25566" stroke-width="1.2"/>
+      <circle cx="151" cy="120" r="21" fill="#D9475C" stroke="#A12A3E" stroke-width="1.8"/></g>` : ''}
+    ${wire(152, 120, 128, 206)}${wire(164, 128, 138, 206)}
+    ${bip ? `${wire(212, 162, 222, 206)}${wire(222, 169, 232, 206)}` : `<circle cx="252" cy="118" r="3" fill="#7A5530"/><path d="M252 118 C252 170 176 190 146 208" fill="none" stroke="#7A5530" stroke-width="2" stroke-dasharray="4 3"/>`}
+    ${clip(133, 206)}${bip ? clip(227, 206) : ''}
+    ${coil(133, 215, 165, 258)}${bip ? coil(227, 215, 197, 258) : ''}
+    <rect x="140" y="262" width="80" height="62" rx="9" fill="#CDD2D7" stroke="#4A545E" stroke-width="1.6"/>
+    <rect x="156" y="255" width="16" height="8" rx="1.5" fill="#2F6FD6" stroke="#4A545E"/><rect x="189" y="255" width="16" height="8" rx="1.5" fill="#FFFFFF" stroke="#4A545E"/>
+    <rect x="149" y="271" width="36" height="22" rx="2" fill="#D3DCD8" stroke="#4A545E"/><rect x="149" y="298" width="36" height="18" rx="2" fill="#D3DCD8" stroke="#4A545E"/>
+    <circle cx="203" cy="281" r="7" fill="#3A4048"/><circle cx="203" cy="303" r="7" fill="#3A4048"/>
+    <text x="180" y="226" text-anchor="middle" font-size="10" ${F} fill="#8A5A47">sternum</text>
+    <text x="112" y="214" text-anchor="end" font-size="12" font-weight="700" ${F} fill="#BF5700">Pair 1</text>${bip ? `<text x="248" y="214" font-size="12" font-weight="700" ${F} fill="#BF5700">Pair 2</text>` : ''}
+    </g>
+    ${teach
+      ? `${lbl(10, 52, 'start', 'Atrial wires', 'right atrium')}${lead(56, 72, 172, 196)}
+         ${bip ? `${lbl(430, 52, 'end', 'Ventricular wires', 'ventricle')}${lead(392, 72, 268, 218)}` : `${lbl(430, 52, 'end', 'Skin ground', 'wire')}${lead(392, 72, 292, 146)}`}
+         ${lbl(430, 280, 'end', 'Pacing cables')}${lead(340, 276, 254, 268)}
+         ${lbl(430, 318, 'end', 'Temporary', 'pacemaker')}${lead(358, 314, 262, 318)}`
+      : `${!bip ? `${lbl(430, 52, 'end', 'Skin ground', 'wire')}${lead(392, 72, 292, 146)}` : ''}`}
+  </svg>`;
+}
 function setupWidget(cfg) {
   // cfg.kind: 'bipolar' (A and V pairs) or 'rap' (single atrial wire + skin ground). cfg.mode: 'teach' | 'quiet'
   APP.setup = { cfg, done: false, attempts: 0, firstTry: null, polarityOk: null, tug: false, errors: [] };
   const card = $('setupCard'); card.hidden = false;
-  const chest = `<svg viewBox="0 0 300 170" role="img" aria-label="Chest with epicardial wires exiting on each side of the sternum. Pair 1 exits on the patient's right; pair 2 on the patient's left.">
-    <path d="M60 165 C55 90 80 30 150 22 C220 30 245 90 240 165Z" fill="#F2DCCB" stroke="#B48A6C"/><line x1="150" y1="34" x2="150" y2="150" stroke="#B48A6C" stroke-width="5" stroke-linecap="round"/>
-    <text x="150" y="162" text-anchor="middle" font-size="11" font-family="Arial" fill="#6B4E3A">sternum</text>
-    <text x="40" y="20" font-size="12" font-weight="700" font-family="Arial" fill="#2F5496">Patient’s RIGHT</text><text x="182" y="20" font-size="12" font-weight="700" font-family="Arial" fill="#2F5496">Patient’s LEFT</text>
-    <path d="M122 118 C100 128 80 135 30 140" fill="none" stroke="#2B2B2B" stroke-width="2"/><path d="M124 124 C104 136 82 145 30 150" fill="none" stroke="#2B2B2B" stroke-width="2"/>
-    <text x="18" y="132" font-size="12" font-weight="700" font-family="Arial" fill="#BF5700">Pair 1</text>
-    ${cfg.kind === 'bipolar' ? `<path d="M178 118 C200 128 220 135 270 140" fill="none" stroke="#2B2B2B" stroke-width="2"/><path d="M176 124 C196 136 218 145 270 150" fill="none" stroke="#2B2B2B" stroke-width="2"/><text x="248" y="132" font-size="12" font-weight="700" font-family="Arial" fill="#BF5700">Pair 2</text>` : `<path d="M205 100 C225 112 240 120 275 122" fill="none" stroke="#7A5530" stroke-width="2" stroke-dasharray="4 3"/><text x="214" y="96" font-size="11" font-family="Arial" fill="#7A5530">skin ground wire</text>`}
-  </svg>`;
+  const chest = chestSVG(cfg);
   const sel = (id, opts) => `<select id="${id}"><option value="">Choose…</option>${opts.map(o => `<option value="${o[0]}">${o[1]}</option>`).join('')}</select>`;
   let form;
   if (cfg.kind === 'bipolar') {
