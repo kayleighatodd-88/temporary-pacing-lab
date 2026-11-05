@@ -1511,6 +1511,20 @@ function aAEG(e, dt, p) {
   return (g(dt, 8, 2.5, 1) + g(dt, 15, 3, -0.75)) * sc * k;
 }
 function vAEG(e, dt, p) { return dt < 0 || dt > 90 ? 0 : (g(dt, 30, 9, 0.2) + g(dt, 48, 9, -0.12)) * p.vAmp / 8; }
+// One pixel spans several ms; sample every whole ms (aligned to the sim clock) and draw each pixel's min/max
+// so narrow QRS and atrial deflections keep the same height from frame to frame instead of aliasing.
+function traceLine(ctx, W, tStart, pxPerMs, valAt, yOf) {
+  ctx.beginPath();
+  for (let x = 0; x <= W; x++) {
+    const t0 = Math.ceil(tStart + x / pxPerMs), t1 = tStart + (x + 1) / pxPerMs;
+    let lo = Infinity, hi = -Infinity, tLo = t0, tHi = t0;
+    for (let t = t0; t < t1 || t === t0; t++) { const v = valAt(t); if (v < lo) { lo = v; tLo = t; } if (v > hi) { hi = v; tHi = t; } }
+    const ys = tHi <= tLo ? [yOf(hi), yOf(lo)] : [yOf(lo), yOf(hi)];
+    if (x === 0) ctx.moveTo(x, ys[0]); else ctx.lineTo(x, ys[0]);
+    if (ys[1] !== ys[0]) ctx.lineTo(x, ys[1]);
+  }
+  ctx.stroke();
+}
 
 function renderStrip(ctx, W, H, tEnd, o) {
   const pxPerMs = o.speed * 5 / 1000;
@@ -1539,19 +1553,16 @@ function renderStrip(ctx, W, H, tEnd, o) {
   const gain = Math.min(50, laneII.h / 3.1);
   const baseII = laneII.y + laneII.h * 0.64;
   // Lead II
-  ctx.strokeStyle = COL.ii; ctx.lineWidth = 1.7; ctx.lineJoin = 'round'; ctx.beginPath();
+  ctx.strokeStyle = COL.ii; ctx.lineWidth = 1.7; ctx.lineJoin = 'round';
   let ia = 0, iv = 0;
-  for (let x = 0; x <= W; x++) {
-    const t = tStart + x / pxPerMs;
+  traceLine(ctx, W, tStart, pxPerMs, t => {
     while (ia < A.length && A[ia].t < t - 1500) ia++;
     while (iv < V.length && V[iv].t < t - 700) iv++;
     let v = 0.01 * Math.sin(t / 47) + 0.006 * Math.sin(t / 13.7);
     for (let j = ia; j < A.length && A[j].t <= t; j++) v += aII(A[j], t - A[j].t);
     for (let j = iv; j < V.length && V[j].t <= t; j++) v += vII(V[j], t - V[j].t);
-    const y = baseII - v * gain;
-    if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-  }
-  ctx.stroke();
+    return v;
+  }, v => baseII - v * gain);
   // pacing spikes on II
   const spikes = evs.filter(e => (e.type === 'AP' || e.type === 'VP') && e.delivered);
   ctx.strokeStyle = COL.spike; ctx.lineWidth = 1.4;
@@ -1587,13 +1598,12 @@ function renderStrip(ctx, W, H, tEnd, o) {
     const base = laneA.y + laneA.h * 0.55, ga = laneA.h * 0.32;
     ctx.fillStyle = COL.text; ctx.textAlign = 'left'; ctx.fillText('Atrial ECG', 8, laneA.y + 14); ctx.textAlign = 'center';
     const open = S.connState('A') === 'open';
-    ctx.strokeStyle = COL.aeg; ctx.lineWidth = 1.3; ctx.beginPath();
-    if (open) { ctx.moveTo(0, base); ctx.lineTo(W, base); ctx.stroke(); ctx.fillStyle = COL.warn; ctx.textAlign = 'left'; ctx.fillText('Atrial wire signal unavailable', 80, laneA.y + 14); ctx.textAlign = 'center'; }
+    ctx.strokeStyle = COL.aeg; ctx.lineWidth = 1.3;
+    if (open) { ctx.beginPath(); ctx.moveTo(0, base); ctx.lineTo(W, base); ctx.stroke(); ctx.fillStyle = COL.warn; ctx.textAlign = 'left'; ctx.fillText('Atrial wire signal unavailable', 80, laneA.y + 14); ctx.textAlign = 'center'; }
     else {
       const amp = S.connState('A') === 'nocontact' ? 0.1 : 1;
       let ja = 0, jv = 0, jn = 0;
-      for (let x = 0; x <= W; x++) {
-        const t = tStart + x / pxPerMs;
+      traceLine(ctx, W, tStart, pxPerMs, t => {
         while (ja < A.length && A[ja].t < t - 80) ja++;
         while (jv < V.length && V[jv].t < t - 100) jv++;
         while (jn < NA.length && NA[jn].t < t - 6) jn++;
@@ -1601,10 +1611,8 @@ function renderStrip(ctx, W, H, tEnd, o) {
         for (let j = ja; j < A.length && A[j].t <= t; j++) v += aAEG(A[j], t - A[j].t, p) * amp;
         for (let j = jv; j < V.length && V[j].t <= t; j++) v += vAEG(V[j], t - V[j].t, p) * amp;
         for (let j = jn; j < NA.length && NA[j].t <= t; j++) v += g(t - NA[j].t, 2, 1.2, NA[j].amp / 2.5);
-        const y = clamp(base - v * ga, laneA.y + 2, laneA.y + laneA.h - 2);
-        if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-      }
-      ctx.stroke();
+        return v;
+      }, v => clamp(base - v * ga, laneA.y + 2, laneA.y + laneA.h - 2));
       ctx.strokeStyle = COL.spike; ctx.lineWidth = 1.2;
       spikes.filter(e => e.type === 'AP').forEach(e => { const x = Math.round((e.t - tStart) * pxPerMs) + 0.5; ctx.beginPath(); ctx.moveTo(x, base + ga * 0.6); ctx.lineTo(x, laneA.y + 3); ctx.stroke(); });
     }
