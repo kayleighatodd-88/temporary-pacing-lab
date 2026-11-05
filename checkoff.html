@@ -2070,7 +2070,7 @@ function begin() {
   if (!K.info.employee) { C.toast('Enter the employee name.'); return; }
   C.store.set('ppl.co.employee', K.info.employee); C.store.set('ppl.co.evaluator', K.info.evaluator);
   K.station = $('coStation').value; const seed = Math.floor(Math.random() * 1e9);
-  K.doc = {}; K.marks = {}; K.comments = {}; K.decision = null; K.auto = null; K.lowMapMs = 0; K.lowMapRun = 0; K.lowMapMax = 0;
+  K.doc = {}; K.marks = {}; K.comments = {}; K.decision = null; K.override = ''; K.auto = null; K.lowMapMs = 0; K.lowMapRun = 0; K.lowMapMax = 0;
   if (K.station === 'A') {
     K.g = G.daily(seed, $('coVar').value || null);
     C.loadPatient(Object.assign({}, K.g.patient, { aConn: 'off', vConn: 'off' }), {}, seed % 100000, { off: true, monitor: false });
@@ -2142,8 +2142,8 @@ function gradeA() {
     const vOk = sv.raised && sv.lowered && numOk(D.dVS, vSensT, 1.1) && typeof d.vSens === 'number' && d.vSens <= vSensT / 2 + 0.05;
     add(aOk && vOk, `Atrial: sweep ${sa.raised && sa.lowered ? 'performed with rate below intrinsic and output minimal' : 'incomplete or without minimal output'}; documented ${D.dAS || '—'} (truth ${aSensT}); final ${C.fmtSens(d.aSens)}. Ventricular: sweep ${sv.raised && sv.lowered ? 'performed correctly' : 'incomplete or without minimal output'}; documented ${D.dVS || '—'} (truth ${vSensT}); final ${C.fmtSens(d.vSens)}.`);
   } else {
-    const tested = sa.anySweep && S.log.some(l => l.key === 'aSens' && l.aOut <= 0.5) || sv.anySweep && S.log.some(l => l.key === 'vSens' && l.vOut <= 0.5);
-    add(deferred(D.dAS) && deferred(D.dVS) && !tested, `Patient not stable for sensitivity testing (no intrinsic P waves; hypotension without pacing). Documented A: ${D.dAS || '—'}, V: ${D.dVS || '—'}${tested ? '; a sensitivity sweep was attempted' : ''}.`);
+    const tested = learnerSensChanges().length > 0;
+    add(deferred(D.dAS) && deferred(D.dVS) && !tested, `Patient not stable for sensitivity testing (no intrinsic P waves; hypotension without pacing). Documented A: ${D.dAS || '—'}, V: ${D.dVS || '—'}${tested ? '; sensitivity was changed' : ''}.`);
   }
   // 9 stimulation
   const aSweep = H.thresholdSweep(S, 'AP', intrinsic + 5), vSweep = H.thresholdSweep(S, 'VP');
@@ -2189,19 +2189,34 @@ function gradeB() {
   const after = S.h.afOn ? 'Atrial fibrillation' : S.h.tachOn ? 'Unchanged' : 'Terminated: sinus rhythm';
   return { rows, docRows: [['Intrinsic atrial rate', D.dAR, t.atrialRate], ['Rhythm before pacing', D.dRh, t.rhythm], ['Rhythm after pacing', D.dRes, after]], critical: criticals(true) };
 }
+// autoFail: the simulator recommends "does not yet meet competency"; the evaluator may override with a written rationale.
+// TODO: confirm the auto-fail list and pass rule against local APP competency policy.
 function criticals(stable) {
   const out = [];
+  const crit = (text, autoFail) => out.push({ text, autoFail });
   const saf = S.safety;
   const n = k => saf.filter(s => s.type === k).length;
-  if (n('asystole')) out.push(`Ventricular asystole > 3 s (${n('asystole')}×)`);
-  if (n('pauseDependent')) out.push('Pause used in a pacing-dependent patient');
-  if (saf.some(s => s.type === 'ront' && s.async)) out.push('Asynchronous ventricular pacing delivered on a T wave');
-  if (!stable && (S.log.some(l => l.key === 'aSens' && l.aOut <= 0.5) || S.log.some(l => l.key === 'vSens' && l.vOut <= 0.5))) out.push('Sensitivity testing attempted in a patient who was not stable');
-  if (K.lowMapMax > 15000) out.push(`Hypotension sustained ${Math.round(K.lowMapMax / 1000)} s without returning to pacing`);
-  if (S.log.some(l => l.action === 'rap' && !l.on && l.dur > 10500)) out.push('RAP burst longer than 10 seconds');
-  const su = C.APP.setup; if (su && su.critical) out.push('Atrial wire connected to the ventricular socket on first attempt (corrected before pacing)');
+  if (n('asystole')) crit(`Ventricular asystole > 3 s (${n('asystole')}×)`, true);
+  if (n('pauseDependent')) crit('Pause used in a pacing-dependent patient', true);
+  const ront = saf.filter(s => s.type === 'ront'), ra = ront.filter(s => s.async).length, rs = ront.length - ra;
+  if (ront.length) crit(`Ventricular stimulus delivered on a T wave (${[ra ? `${ra}× during asynchronous pacing` : '', rs ? `${rs}× from undersensing / competitive demand pacing` : ''].filter(Boolean).join('; ')})`, true);
+  const sens = learnerSensChanges();
+  if (!stable && sens.length) crit('Sensitivity changed in a patient who was not stable for sensitivity testing', true);
+  const hot = sens.filter(l => { const A = l.key === 'aSens', amp = A ? S.p.aAmp : S.p.vAmp; return (l.to === 'ASYNC' || l.to > amp) && (A ? l.aOut : l.vOut) > 0.5; });
+  if (hot.length) crit(`Sensing turned off or set above the intrinsic signal without first reducing output to minimum (${[...new Set(hot.map(l => l.key === 'aSens' ? 'atrial' : 'ventricular'))].join(' and ')}): competitive pacing risk`, true);
+  if (K.lowMapMax > 15000) crit(`Hypotension sustained ${Math.round(K.lowMapMax / 1000)} s without returning to pacing`, true);
+  if (S.log.some(l => l.action === 'rap' && !l.on && l.dur > 10500)) crit('RAP burst longer than 10 seconds', false);
+  const su = C.APP.setup; if (su && su.critical) crit('Atrial wire connected to the ventricular socket on first attempt (corrected before pacing)', false);
   return out;
 }
+function learnerSensChanges() { return S.log.filter(l => l.action === 'set' && (l.key === 'aSens' || l.key === 'vSens') && (l.src === 'device' || l.src === 'keyboard')); }
+function simRecommendation(R) {
+  const autoYes = R.rows.filter(r => r.yes === true).length, autoN = R.rows.filter(r => r.yes != null).length;
+  if (R.critical.some(c => c.autoFail)) return { cls: 'no', text: 'Does not yet meet competency: critical safety event recorded.' };
+  if (autoYes < autoN) return { cls: 'no', text: `Not all observable criteria met (${autoYes} of ${autoN}): evaluator to judge.` };
+  return { cls: 'ok', text: 'All observable criteria met; no critical safety events.' };
+}
+const needsOverride = () => K.auto && K.auto.critical.some(c => c.autoFail) && K.decision != null && K.decision >= 2;
 
 /* ---------- review and evaluator decision ---------- */
 function renderReview() {
@@ -2211,19 +2226,23 @@ function renderReview() {
   $('toolPanel').innerHTML = `<section class="card"><span class="chip or">Evaluator review</span><h2 style="margin-top:6px">${A ? 'Initiating temporary pacing' : 'Atrial overdrive pacing'}: ${esc(K.info.employee)}</h2>
     <p class="small muted" style="margin-top:0">Simulator-observed criteria are pre-filled from the recorded actions; the evaluator can change any mark. Verbalized criteria are left for the evaluator.</p>
     <p class="small"><b>Simulator summary:</b> ${autoYes} of ${autoN} observable procedure criteria met${A ? ` · patient ${K.g.variant === 'stable' ? 'stable (sensitivity testing appropriate)' : 'not stable (sensitivity testing should be deferred)'}` : ''}.</p>
-    ${R.critical.length ? `<div class="fb no"><b>Safety events to discuss:</b><ul style="margin:4px 0 0">${R.critical.map(c => `<li>${esc(c)}</li>`).join('')}</ul></div>` : '<div class="fb ok">No critical safety events recorded.</div>'}</section>
+    <div class="fb ${simRecommendation(R).cls}"><b>Simulator recommendation:</b> ${esc(simRecommendation(R).text)}</div>
+    ${R.critical.length ? `<div class="fb no"><b>Safety events:</b><ul style="margin:4px 0 0">${R.critical.map(c => `<li>${c.autoFail ? '<b>Auto-fail:</b> ' : 'Discuss: '}${esc(c.text)}</li>`).join('')}</ul></div>` : '<div class="fb ok">No critical safety events recorded.</div>'}</section>
     <section class="card"><h2>General criteria (evaluator)</h2><table class="form"><tr><th>Criterion</th><th>Yes / No</th><th>Comments</th></tr>${GENERAL.map((c, i) => `<tr><td>${i + 1}. ${esc(c)}</td><td class="yn">${yn('g' + i, K.marks['g' + i])}</td><td><input data-c="g${i}" value="${esc(K.comments['g' + i] || '')}" style="width:100%;min-height:30px;border:1px solid var(--line);border-radius:6px;padding:2px 6px;background:var(--panel2)"></td></tr>`).join('')}</table></section>
     <section class="card"><h2>Procedure criteria</h2><table class="form"><tr><th>Criterion</th><th>Yes / No</th><th>Simulator evidence / comments</th></tr>${proc.map((c, i) => `<tr><td>${i + 1}. ${esc(c)}</td><td class="yn">${yn('p' + i, K.marks['p' + i])}</td><td><textarea data-c="p${i}" rows="2" style="width:100%;border:1px solid var(--line);border-radius:6px;padding:4px 6px;background:var(--panel2);font-size:13px">${esc(K.comments['p' + i] || '')}</textarea></td></tr>`).join('')}</table></section>
     <section class="card"><h2>Documentation compared with simulator values</h2><table class="form"><tr><th>Item</th><th>Documented</th><th>Simulator</th></tr>${R.docRows.map(r => `<tr><td>${esc(r[0])}</td><td>${esc(r[1] || '—')}</td><td>${esc(r[2])}</td></tr>`).join('')}</table></section>
     <section class="card"><h2>Assessment decision (evaluator)</h2>${DECISIONS.map((x, i) => `<label class="opt" style="display:flex;gap:8px;margin:4px 0;font-size:14px"><input type="radio" name="dec" value="${i}"${K.decision === i ? ' checked' : ''}> <span>${esc(x)}</span></label>`).join('')}
+    <div id="coOverrideWrap" class="fb no"${needsOverride() ? '' : ' hidden'} style="margin-top:10px"><b>Override rationale required.</b> An auto-fail safety event was recorded, but the selected decision rates the employee as safe for practice. Explain why:<textarea id="coOverride" rows="3" style="width:100%;margin-top:6px;border:1px solid var(--line);border-radius:6px;padding:4px 6px;background:var(--panel);color:var(--ink)">${esc(K.override || '')}</textarea></div>
     <div class="row" style="margin-top:12px"><button class="btn primary" id="coReport">Generate competency form</button><button class="btn sm" id="coNew">New check-off</button></div></section>`;
-  $('toolPanel').querySelectorAll('input[type=radio]').forEach(r => r.addEventListener('change', () => { if (r.name === 'dec') K.decision = +r.value; else K.marks[r.name] = r.value; }));
+  $('toolPanel').querySelectorAll('input[type=radio]').forEach(r => r.addEventListener('change', () => { if (r.name === 'dec') { K.decision = +r.value; $('coOverrideWrap').hidden = !needsOverride(); } else K.marks[r.name] = r.value; }));
+  $('coOverride').addEventListener('input', e => { K.override = e.target.value; });
   $('toolPanel').querySelectorAll('[data-c]').forEach(el => el.addEventListener('input', () => { K.comments[el.dataset.c] = el.value; }));
   $('coReport').addEventListener('click', report);
   $('coNew').addEventListener('click', renderStart);
 }
 function report() {
   const A = K.station === 'A', proc = A ? PROC_A : PROC_B, R = K.auto;
+  if (needsOverride() && !(K.override || '').trim()) { C.toast('Enter an override rationale: an auto-fail safety event was recorded.'); $('coOverride').focus(); return; }
   const mark = v => v === 'yes' ? '<span class="res-yes">Yes</span>' : v === 'no' ? '<span class="res-no">No</span>' : '';
   const body = `<h1>TCPCHD Advanced Practice Provider Competency Validation</h1>
     <p><b>Employee name:</b> ${esc(K.info.employee)} &nbsp; <b>Date:</b> ${esc(K.info.date)}<br><b>Evaluator name:</b> ${esc(K.info.evaluator || '')}</p>
@@ -2233,7 +2252,9 @@ function report() {
     <h3>Assessment decision</h3><ul style="list-style:none;padding:0">${DECISIONS.map((x, i) => `<li>${K.decision === i ? '<b>◉ ' + esc(x) + '</b>' : '○ ' + esc(x)}</li>`).join('')}</ul>
     <h3>Simulator record</h3><p>Station completed in the Temporary Pacing Lab simulator${A ? ` (patient: ${K.g.variant === 'stable' ? 'stable' : 'not stable for sensitivity testing'})` : ''}. Simulated time ${C.mmss(S.t)}. Final settings: ${esc(C.settingsLine())}.</p>
     <table><tr><th>Documented item</th><th>Employee</th><th>Simulator</th></tr>${R.docRows.map(r => `<tr><td>${esc(r[0])}</td><td>${esc(r[1] || '—')}</td><td>${esc(r[2])}</td></tr>`).join('')}</table>
-    ${R.critical.length ? `<p><b>Safety events:</b> ${R.critical.map(esc).join('; ')}</p>` : '<p>No critical safety events recorded.</p>'}
+    <p><b>Simulator recommendation:</b> ${esc(simRecommendation(R).text)}</p>
+    ${R.critical.length ? `<p><b>Safety events:</b> ${R.critical.map(c => (c.autoFail ? 'Auto-fail: ' : 'Discuss: ') + esc(c.text)).join('; ')}</p>` : '<p>No critical safety events recorded.</p>'}
+    ${needsOverride() ? `<p><b>Evaluator override rationale:</b> ${esc(K.override)}</p>` : ''}
     <p style="font-size:12px;color:#555;margin-top:16px">Simulator evidence supports, and does not replace, the evaluator’s judgment. Educational simulation; not connected to a medical device.</p>
     <p style="margin-top:28px">Employee signature: ______________________ &nbsp;&nbsp; Evaluator signature: ______________________</p>`;
   C.openReport('Competency form', body, `TCPCHD-${A ? 'temporary-pacing' : 'atrial-overdrive'}-${(K.info.employee || 'employee').replace(/\s+/g, '-')}-${K.info.date}.html`, C.wrapStandalone('TCPCHD Competency Validation', body));
