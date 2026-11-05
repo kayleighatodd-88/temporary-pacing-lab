@@ -117,7 +117,7 @@ footer.foot{ padding:14px 20px 26px; color:var(--muted); font-size:13px; text-al
 .led{ display:flex; flex-direction:column; align-items:center; gap:1px; font-size:8.5px; letter-spacing:.2px; }
 .led i{ width:10px; height:10px; border-radius:50%; background:#7E8884; border:1px solid #545D59; }
 .led.pace.on i{ background:#25D45E; box-shadow:0 0 8px #25D45E; }
-.led.sense.on i{ background:#FFB52E; box-shadow:0 0 8px #FFB52E; }
+.led.sense.on i{ background:#2F8CFF; box-shadow:0 0 8px #2F8CFF; }
 .urow{ display:grid; grid-template-columns:44px minmax(0,1fr); align-items:center; padding:3px 0; }
 .urow svg{ display:block; }
 .urow .lab{ font-size:10px; font-weight:700; text-align:right; line-height:1.1; }
@@ -647,8 +647,9 @@ function createSim() {
     const sens = ch === 'A' ? d.aSens : d.vSens;
     if (sig.amp < sens) return setStatus('under');
     if (ch === 'V' && t < pm.vBlankUntil) return setStatus('blanked');
-    if (ch === 'A' && t < pm.aRefUntil) { marker('A', 'AR', { src: sig.src }); return setStatus('refractory'); }
-    if (ch === 'V' && t < pm.vRefUntil) { return setStatus('refractory'); }
+    // 5392: A SENSE flashes inside and outside the atrial refractory period; V SENSE flashes for anything outside blanking.
+    if (ch === 'A' && t < pm.aRefUntil) { S.led.AS = t; marker('A', 'AR', { src: sig.src }); return setStatus('refractory'); }
+    if (ch === 'V' && t < pm.vRefUntil) { S.led.VS = t; return setStatus('refractory'); }
     S.led[ch + 'S'] = t;
     marker(ch, ch + 'S', { src: sig.src });
     setStatus('sensed');
@@ -2036,7 +2037,7 @@ const LESSONS = [
   device: { mode: 'DDD', rate: 80 },
   steps: [
     { hl: ['lcdU'], text: 'The <b>upper screen</b> always shows the three settings you can reach directly: <b>RATE</b> (ppm), <b>A OUTPUT</b> and <b>V OUTPUT</b> (mA). The fan scales show where each value sits in its range (rate 30–200, A 0–20 mA, V 0–25 mA). The bottom line shows the mode, battery and lock indicator.' },
-    { hl: ['lcdU'], text: 'Across the top are the <b>PACE</b> (green) and <b>SENSE</b> (orange) lights for each chamber. Right now this baby’s own rhythm (about 130) is faster than the rate of 80, so you should see only the orange SENSE lights. <b>PACE means a pulse was delivered. It never proves capture: only the ECG can.</b>' },
+    { hl: ['lcdU'], text: 'Across the top are the <b>PACE</b> (green) and <b>SENSE</b> (blue) lights for each chamber. Right now this baby’s own rhythm (about 130) is faster than the rate of 80, so you should see only the blue SENSE lights. <b>PACE means a pulse was delivered. It never proves capture: only the ECG can. SENSE means electrical activity was detected, not that the heart contracted.</b>' },
     { hl: ['knRate'], do: 'Turn the RATE dial (drag around it, scroll, or use arrow keys) to 100 ppm.', check: () => S.d.rate === 100, ok: 'The rate is a lower rate: the pacemaker only paces if the heart is slower than this.' },
     { hl: ['knA'], do: 'Turn A OUTPUT to 5.0 mA.', check: () => S.d.aOut === 5, ok: 'Output is the energy of each pulse. Too little and the pulse will not capture.' },
     { hl: ['lcdL', 'kUp', 'kDown', 'knDial'], do: 'On the lower screen, use ▲ ▼ to highlight V Sensitivity, then turn the menu parameter dial to set 3.0 mV.', check: () => S.d.vSens === 3, ok: 'Notice the direction: turning the dial clockwise makes the pacemaker more sensitive (a smaller mV number).' },

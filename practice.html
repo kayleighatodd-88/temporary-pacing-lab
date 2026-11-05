@@ -117,7 +117,7 @@ footer.foot{ padding:14px 20px 26px; color:var(--muted); font-size:13px; text-al
 .led{ display:flex; flex-direction:column; align-items:center; gap:1px; font-size:8.5px; letter-spacing:.2px; }
 .led i{ width:10px; height:10px; border-radius:50%; background:#7E8884; border:1px solid #545D59; }
 .led.pace.on i{ background:#25D45E; box-shadow:0 0 8px #25D45E; }
-.led.sense.on i{ background:#FFB52E; box-shadow:0 0 8px #FFB52E; }
+.led.sense.on i{ background:#2F8CFF; box-shadow:0 0 8px #2F8CFF; }
 .urow{ display:grid; grid-template-columns:44px minmax(0,1fr); align-items:center; padding:3px 0; }
 .urow svg{ display:block; }
 .urow .lab{ font-size:10px; font-weight:700; text-align:right; line-height:1.1; }
@@ -647,8 +647,9 @@ function createSim() {
     const sens = ch === 'A' ? d.aSens : d.vSens;
     if (sig.amp < sens) return setStatus('under');
     if (ch === 'V' && t < pm.vBlankUntil) return setStatus('blanked');
-    if (ch === 'A' && t < pm.aRefUntil) { marker('A', 'AR', { src: sig.src }); return setStatus('refractory'); }
-    if (ch === 'V' && t < pm.vRefUntil) { return setStatus('refractory'); }
+    // 5392: A SENSE flashes inside and outside the atrial refractory period; V SENSE flashes for anything outside blanking.
+    if (ch === 'A' && t < pm.aRefUntil) { S.led.AS = t; marker('A', 'AR', { src: sig.src }); return setStatus('refractory'); }
+    if (ch === 'V' && t < pm.vRefUntil) { S.led.VS = t; return setStatus('refractory'); }
     S.led[ch + 'S'] = t;
     marker(ch, ch + 'S', { src: sig.src });
     setStatus('sensed');
