@@ -181,6 +181,9 @@ footer.foot{ padding:14px 20px 26px; color:var(--muted); font-size:13px; text-al
 .stepbox .do{ font-weight:700; color:var(--navy); }
 .fb{ margin-top:8px; font-size:14px; padding:7px 10px; border-radius:8px; background:var(--panel); border:1px solid var(--line); }
 .fb.ok{ border-left:4px solid var(--good); } .fb.no{ border-left:4px solid var(--amber); }
+.lessonbar{ display:flex; gap:8px; align-items:center; }
+.lessonbar select{ flex:1; min-width:0; min-height:38px; padding:6px 10px; border:1px solid var(--line); border-radius:8px; background:var(--panel2); color:var(--ink); font-weight:700; font-size:14.5px; }
+#lessonFence .card.fence{ border:none; padding:0; margin-top:14px; background:transparent; }
 .lessonlist{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; }
 .lessonlist button{ width:100%; text-align:left; display:grid; grid-template-columns:28px 1fr auto; gap:8px; align-items:center; padding:8px 10px; border-radius:8px; border:1px solid var(--line); background:var(--panel2); cursor:pointer; font-size:14px; }
 .lessonlist button[aria-current="true"]{ border-color:var(--orange); background:var(--panel); box-shadow:inset 4px 0 0 var(--orange); }
@@ -375,7 +378,7 @@ const DEV_ARP = 250, DEV_VRP = 250, V_BLANK = 28; // simulation simplifications
 function defaultPatient() {
   return { age: 'infant', rhythm: 'sinus', atrialRate: 130, sinusVar: 0, junctionalRate: 150, tachRate: 300,
     av: 'intact', pr: 110, prVar: 0, maxCond: 220, escape: 'junctional', escapeRate: 60, pvcRate: 0, contractility: 1,
-    aConn: 'on', vConn: 'on', aThr: 1.5, vThr: 2, aAmp: 3, vAmp: 8, aNoise: 0, vNoise: 0, tWave: 0.12,
+    wRatio: 4, m2Ratio: 3, aConn: 'on', vConn: 'on', aThr: 1.5, vThr: 2, aAmp: 3, vAmp: 8, aNoise: 0, vNoise: 0, tWave: 0.12,
     instability: 0, aLOCp: 0, vLOCp: 0, rapOutcome: 'terminate', conceal: 0.5 };
 }
 function defaultDevice() {
@@ -421,7 +424,7 @@ function createSim() {
     S.t = 0; S.ev = []; S.hist = []; S.log = []; S.safety = []; S.seq = 1; S.rng = mulberry32(seed || 7);
     S.rt = { pauseHeld: false, pauseStart: 0, rapOn: false, rapStart: 0, emergency: false, prevMode: null, offConfirm: false, selfTestUntil: 0 };
     const p = S.p;
-    S.h = { nextSinus: 300, aRef: 0, lastA: -1e9, lastV: -1e9, prevV: -1e9, vRef: 0, avnRef: 0, lastCondA: -1e9, wenck: 0,
+    S.h = { nextSinus: 300, aRef: 0, lastA: -1e9, lastV: -1e9, prevV: -1e9, vRef: 0, avnRef: 0, lastCondA: -1e9, wenck: 0, m2: 0,
       nextJx: 400, nextEsc: 1e9, nextTach: 200, tachOn: p.rhythm === 'aflutter', afOn: p.rhythm === 'afib', nextAF: 100,
       pending: [], signals: [], nextNoise: { A: 300, V: 500 }, noiseBurst: { A: 0, V: 0 }, nextPVC: 1e9,
       connOpen: { A: false, V: false }, connNext: { A: 800, V: 900 }, rapGood: 0, ej: [], asysLogged: false, lowMapSince: null };
@@ -499,9 +502,13 @@ function createSim() {
     let pr = p.pr + (p.prVar ? (R() * 2 - 1) * p.prVar : 0);
     const cyc = t - h.lastCondA;
     if (cyc < minCL + 150) pr += (minCL + 150 - cyc) * 0.5;
-    if (p.av === 'intermittent') {
+    if (p.av === 'intermittent') { // Mobitz I: PR lengthens each beat until one P is not conducted
       pr += h.wenck * 60; h.wenck++;
-      if (h.wenck >= 4) { h.wenck = 0; h.lastCondA = t; aev.cond = 'wenck'; return; }
+      if (h.wenck >= (p.wRatio || 4)) { h.wenck = 0; h.lastCondA = t; aev.cond = 'wenck'; return; }
+    }
+    if (p.av === 'mobitz2') { // Mobitz II: constant PR, then a P wave suddenly not conducted
+      h.m2 = (h.m2 || 0) + 1;
+      if (h.m2 >= (p.m2Ratio || 3)) { h.m2 = 0; h.lastCondA = t; aev.cond = 'block'; return; }
     }
     h.avnRef = t + minCL; h.lastCondA = t;
     h.pending.push({ t: t + pr, aId: aev.id });
@@ -737,6 +744,7 @@ function createSim() {
           else { h.nextTach = t + tachCL(); result = 'entrained but resumed'; }
         } else { h.nextTach = t + tachCL() * 0.6; result = h.rapGood > 0 ? 'insufficient (too slow or too brief)' : 'no capture'; }
       } else if (!h.afOn && h.rapGood >= 10 && p.rapOutcome === 'degenerate') { h.afOn = true; p.rhythm = 'afib'; result = 'induced atrial fibrillation'; }
+      else if (p.rhythm === 'junctional') result = 'JET persists: it is an automatic focus, not re-entry, so rapid atrial pacing cannot terminate it. Pace the atrium just above the JET rate instead';
       addEv({ type: 'RAPEND', t, result, good: h.rapGood });
       S.pm.lastA = t; S.pm.lastV = t; S.pm.avStart = null; S.pm.aRefUntil = t + 300;
       S.logAction('rap', { on: false, dur, result, good: h.rapGood, rapRate: S.d.rapRate, src });
@@ -2004,8 +2012,10 @@ const PSCHEMA = [
   { k: 'atrialRate', label: 'Sinus (atrial) rate', min: 0, max: 250, step: 1, unit: 'bpm' },
   { k: 'junctionalRate', label: 'Junctional / JET rate', min: 40, max: 260, step: 1, unit: 'bpm' },
   { k: 'tachRate', label: 'Flutter / IART rate', min: 150, max: 450, step: 5, unit: 'bpm' },
-  { k: 'av', label: 'AV conduction', type: 'select', opts: [['intact', 'Intact'], ['prolonged', 'Prolonged (set PR)'], ['intermittent', 'Intermittent (Wenckebach)'], ['absent', 'Absent (complete block)']] },
+  { k: 'av', label: 'AV conduction', type: 'select', opts: [['intact', 'Normal'], ['prolonged', '1st-degree AV block (set PR)'], ['intermittent', '2nd-degree Mobitz I (Wenckebach)'], ['mobitz2', '2nd-degree Mobitz II'], ['absent', '3rd-degree / complete heart block']] },
   { k: 'pr', label: 'PR / AV conduction time', min: 60, max: 350, step: 5, unit: 'ms' },
+  { k: 'wRatio', label: 'Mobitz I: P waves per cycle', min: 3, max: 8, step: 1, unit: '(1 dropped)' },
+  { k: 'm2Ratio', label: 'Mobitz II: every Nth P blocked', min: 2, max: 6, step: 1, unit: '' },
   { k: 'maxCond', label: 'Max 1:1 AV conduction', min: 100, max: 320, step: 5, unit: 'bpm' },
   { k: 'escape', label: 'Escape rhythm', type: 'select', opts: [['none', 'None'], ['junctional', 'Junctional (narrow)'], ['ventricular', 'Ventricular (wide)']] },
   { k: 'escapeRate', label: 'Escape rate', min: 15, max: 120, step: 1, unit: 'bpm' },
@@ -2022,8 +2032,27 @@ const PSCHEMA = [
   { k: 'instability', label: 'Threshold fluctuation', min: 0, max: 0.4, step: 0.01, unit: '%', pct: true },
   { k: 'rapOutcome', label: 'RAP response (if adequate)', type: 'select', opts: [['terminate', 'Terminates'], ['fail', 'Resumes after burst'], ['degenerate', 'Degenerates to AF']] }
 ];
+// One-click rhythms, scaled to the current age category.
+const PRESETS = [
+  ['sinus', 'Normal sinus rhythm'], ['brady', 'Sinus bradycardia (e.g. dexmedetomidine)'], ['avb1', '1st-degree AV block'],
+  ['mobitz1', '2nd-degree Mobitz I (Wenckebach)'], ['mobitz2', '2nd-degree Mobitz II'], ['chb', 'Complete heart block'],
+  ['jet', 'Junctional ectopic tachycardia (JET)'], ['flutter', 'Atrial flutter / IART (RAP-responsive)']
+];
+function presetPatch(k) {
+  const A = AGE[S.p.age], pr = { neonate: 100, infant: 110, child: 130, adolescent: 150 }[S.p.age];
+  const base = { rhythm: 'sinus', atrialRate: A.hr, av: 'intact', pr, maxCond: Math.round(A.hi * 1.15), escape: 'junctional', escapeRate: Math.round(A.lo * 0.6) };
+  const flut = { neonate: 420, infant: 380, child: 320, adolescent: 280 }[S.p.age];
+  return Object.assign(base, {
+    sinus: {}, brady: { atrialRate: Math.round(A.hr * 0.6), escapeRate: Math.round(A.hr * 0.45) },
+    avb1: { av: 'prolonged', pr: pr + 110 }, mobitz1: { av: 'intermittent', wRatio: 4 }, mobitz2: { av: 'mobitz2', m2Ratio: 3 },
+    chb: { av: 'absent', escapeRate: Math.round(A.lo * 0.5) },
+    jet: { rhythm: 'junctional', junctionalRate: Math.round(A.hr * 1.4), escape: 'none' },
+    flutter: { rhythm: 'aflutter', tachRate: flut, maxCond: Math.round(flut / 2 * 1.05), rapOutcome: 'terminate' }
+  }[k]);
+}
 function buildInstructor(note) {
-  let h = `<p class="note">${note}</p><div class="isec">Hidden truth (live)</div><dl class="truth" id="truth"></dl>`;
+  let h = `<p class="note">${note}</p><div class="isec">Quick rhythm</div><label class="irow"><span>Set the patient to</span><select id="iPreset"><option value="">Choose a rhythm…</option>${PRESETS.map(p => `<option value="${p[0]}">${p[1]}</option>`).join('')}</select></label>
+    <p class="note" style="margin-top:4px">Rates scale to the age category, so pick the age first. Fine-tune with the controls below.</p><div class="isec">Hidden truth (live)</div><dl class="truth" id="truth"></dl>`;
   let open = false;
   PSCHEMA.forEach(f => {
     if (f.sec) { h += `${open ? '</div>' : ''}<div class="isec">${f.sec}</div><div>`; open = true; return; }
@@ -2038,6 +2067,7 @@ function buildInstructor(note) {
     el.addEventListener('input', () => { const patch = { [f.k]: val() }; if (f.k === 'av' && patch.av === 'prolonged' && S.p.pr < 200) patch.pr = 220; S.setPatient(patch, 'instructor', true); refreshInstructor(true); });
     el.addEventListener('change', () => S.logAction('patient', { patch: JSON.stringify({ [f.k]: val() }), src: 'instructor' }));
   });
+  $('iPreset').addEventListener('change', e => { const k = e.target.value; if (!k) return; S.setPatient(presetPatch(k), 'instructor'); e.target.value = ''; refreshInstructor(true); toast(`Patient set to: ${PRESETS.find(p => p[0] === k)[1]}`); });
   $('iAutoLock').value = APP.autoLock ? '1' : '0';
   $('iAutoLock').addEventListener('change', e => { APP.autoLock = e.target.value === '1'; S.d.autoLock = APP.autoLock; });
 }
@@ -2055,7 +2085,7 @@ function refreshInstructor(force) {
   const sm = (set, amp) => set === 'ASYNC' ? 'ASYNC' : `${(amp / set).toFixed(1)}× (signal ${amp} vs ${set} mV)`;
   const rh = S.h.afOn ? 'Atrial fibrillation' : S.h.tachOn ? `Atrial flutter ${p.tachRate}` : p.rhythm === 'junctional' ? `Junctional ${p.junctionalRate}, sinus ${p.atrialRate}` : p.atrialRate ? `Sinus ${p.atrialRate}` : 'Sinus arrest';
   const eff = ch => (ch === 'A' ? p.aThr : p.vThr) * ((ch === 'A' ? p.aPolRev : p.vPolRev) ? 1.6 : 1);
-  $('truth').innerHTML = `<dt>Rhythm</dt><dd>${esc(rh)}</dd><dt>AV conduction</dt><dd>${esc(p.av)} · PR ${p.pr} ms</dd><dt>Escape</dt><dd>${esc(p.escape)}${p.escape !== 'none' ? ' ' + p.escapeRate : ''}</dd>
+  $('truth').innerHTML = `<dt>Rhythm</dt><dd>${esc(rh)}</dd><dt>AV conduction</dt><dd>${esc(PSCHEMA.find(f => f.k === 'av').opts.find(o => o[0] === p.av)[1])} · PR ${p.pr} ms</dd><dt>Escape</dt><dd>${esc(p.escape)}${p.escape !== 'none' ? ' ' + p.escapeRate : ''}</dd>
     <dt>Measured rates</dt><dd>A ${tr.atrial || '–'} · V ${tr.ventricular || '–'} /min</dd>
     <dt>A capture threshold</dt><dd>${eff('A').toFixed(1)} mA · output ${ratio(d.aOut, eff('A'))}</dd><dt>V capture threshold</dt><dd>${eff('V').toFixed(1)} mA · output ${ratio(d.vOut, eff('V'))}</dd>
     <dt>A sensing threshold</dt><dd>${fmtSens(A_SENS.filter(x => x !== 'ASYNC' && x <= p.aAmp).pop() || 0.4)} mV · ${sm(d.aSens, p.aAmp)}</dd><dt>V sensing threshold</dt><dd>${fmtSens(V_SENS.filter(x => x !== 'ASYNC' && x <= p.vAmp).pop() || 0.8)} mV · ${sm(d.vSens, p.vAmp)}</dd>
@@ -2213,7 +2243,7 @@ const LESSONS = [
   ]
 },
 {
-  title: 'Daily check 3: sensing threshold (only if stable)', min: 7,
+  title: 'Daily check 3: sensing threshold (only if stable)', min: 7, fence: true,
   goal: 'Find the atrial sensing threshold with the manufacturer’s sequence and set a 2:1 margin.',
   patient: { age: 'child', rhythm: 'sinus', atrialRate: 108, av: 'intact', pr: 140, maxCond: 200, escape: 'junctional', escapeRate: 50, aThr: 1, vThr: 1.5, aAmp: 2.4, vAmp: 7.2 },
   device: { mode: 'DDD', rate: 100, aOut: 5, vOut: 5, avi: 180, man: MAN },
@@ -2230,7 +2260,7 @@ const LESSONS = [
   ]
 },
 {
-  title: 'Oversensing, undersensing and wire problems', min: 7,
+  title: 'Oversensing, undersensing and wire problems', min: 7, fence: true,
   goal: 'Recognize and correct sensing failures and hardware problems.',
   patient: { age: 'infant', rhythm: 'sinus', atrialRate: 135, av: 'absent', escape: 'junctional', escapeRate: 50, aThr: 1, vThr: 1.5, aAmp: 2.5, vAmp: 7, vNoise: 1.6 },
   device: { mode: 'DDD', rate: 120, aOut: 5, vOut: 5, aSens: 0.5, vSens: 1.0, avi: 120, url: 180, pvarp: 250, man: MAN },
@@ -2269,7 +2299,23 @@ const LESSONS = [
     { hl: ['knRate'], do: 'Raise the rate about 10 above the junctional rate (195 ppm or more) and get 8 consecutive atrial-paced beats conducted to the ventricles.', check: () => H.pacedConductedStreak(S, T.enterT).best >= 8, ok: 'AV synchrony restored: each paced P wave conducts with a narrow QRS.' },
     { hl: ['knRate'], do: 'Briefly slow the rate to 170 and watch the junctional beats return.', check: () => histSince(e => e.type === 'V' && e.kind === 'junctional').length >= 3, ok: 'The JET was there all along: pacing outran it but did not terminate it.' },
     { hl: ['knRate'], do: 'Resume pacing above the junctional rate.', check: () => H.pacedConductedStreak(S, T.enterT).cur >= 6 },
+    { q: { type: 'mc', prompt: 'A colleague suggests a rapid atrial pacing (RAP) burst to “break” the JET. What do you expect?', options: ['JET continues after the burst: it is an automatic focus, so RAP cannot terminate it (and may induce atrial fibrillation)', 'JET terminates, like atrial flutter', 'JET converts to complete heart block', 'The pacemaker will refuse to deliver RAP'], answer: 0, explain: 'RAP works by entering the excitable gap of a re-entrant circuit (atrial flutter, IART). JET is automatic: there is no circuit to interrupt. Treat JET with cooling, sedation, electrolytes, antiarrhythmics per your team, and atrial pacing just above the JET rate for AV synchrony. You can try it: open Patient controls and choose “Atrial flutter / IART” to practice RAP that works.' } },
     { text: 'Per the nursing guideline: pace faster than the junctional rate, then slowly decrease toward the desired synchronous rate; this requires an intact conduction system. Your slides list AOO for JET overdrive; AAI works the same way when the paced rate is above the intrinsic atrial rate.' }
+  ]
+},
+{
+  title: 'Pacing for cardiac output: bradycardia on dexmedetomidine', min: 7,
+  goal: 'Use atrial pacing to raise heart rate and cardiac output in a postoperative infant with sinus bradycardia.',
+  patient: { age: 'infant', rhythm: 'sinus', atrialRate: 92, av: 'intact', pr: 115, maxCond: 230, escape: 'junctional', escapeRate: 70, contractility: 0.7, aThr: 1.2, vThr: 1.6, aAmp: 2.6, vAmp: 8 },
+  device: { mode: 'AAI', rate: 80, aOut: 5, aSens: 0.5 },
+  steps: [
+    { text: '<b>4-month-old, POD 1 after tetralogy of Fallot repair</b>, on dexmedetomidine for sedation. Sinus rhythm at about 90, MAP in the 40s, cool feet, urine output falling, lactate rising. The pacemaker is in AAI at 80 as backup, so it is not pacing.<br><br>An infant’s stroke volume has little reserve (and a stiff, postoperative right ventricle has less), so <b>cardiac output depends on heart rate</b>. Dexmedetomidine commonly slows the sinus rate.' },
+    { hl: ['tbEvents'], q: { type: 'mc', prompt: 'AV conduction is intact. Which pacing approach best supports cardiac output?', options: ['AAI at an age-appropriate rate above the sinus rate, keeping AV synchrony and normal ventricular activation', 'VVI at 140', 'DOO at 140 for guaranteed capture', 'Leave the pacemaker as backup and wait'], answer: 0, explain: 'With intact AV conduction, atrial pacing raises the rate while keeping the atrial kick and a narrow QRS. VVI loses AV synchrony; asynchronous modes risk competition.' } },
+    { enter: () => { T.mem.map0 = S.stats().map; T.mem.rateT = 0; }, hl: ['knRate'], do: 'Raise the RATE to 130–140 ppm and confirm every atrial spike is followed by a P wave and a conducted, narrow QRS.', check: () => S.d.mode === 'AAI' && S.d.rate >= 125 && S.d.rate <= 150 && H.pacedConductedStreak(S, T.enterT).cur >= 6, ok: 'AAI pacing with 1:1 AV conduction: AP followed by a narrow, conducted QRS.' },
+    { hl: ['tbART'], do: 'Watch the arterial line for about 10 seconds at the new rate.', check: () => { if (S.d.rate >= 125 && !T.mem.rateT) T.mem.rateT = S.t; const m = S.stats().map; return T.mem.rateT && S.t - T.mem.rateT > 8000 && m >= (T.mem.map0 || 0) + 3; }, ok: 'Higher rate with preserved AV synchrony raised cardiac output and blood pressure.' },
+    { hl: ['knA'], do: 'This patient will rely on atrial capture now. Make sure A output is at least 2× the atrial capture threshold (threshold 1.2 mA).', check: () => S.d.aOut >= 2.4 },
+    { q: { type: 'mc', prompt: 'What else belongs in your plan?', options: ['Tell the team, review the dexmedetomidine dose, reassess perfusion (lactate, urine output, capillary refill) and document the pacing indication and settings', 'Keep raising the rate toward 200 for maximum output', 'Switch to VVI to be safe', 'Turn the pacemaker off as soon as the pressure improves'], answer: 0, explain: 'Pacing treats the rate; the team should also address the cause. Very fast rates shorten filling time and raise myocardial oxygen demand, so pick the lowest rate that restores perfusion.' } },
+    { text: 'Watch the PR interval. Dexmedetomidine and postoperative edema can also slow AV conduction. If the PR lengthens or P waves stop conducting (Mobitz I/II or complete block), AAI no longer helps: switch to DDD. Recheck the underlying rhythm every day.' }
   ]
 }
 ];
@@ -2292,14 +2338,18 @@ function enterStep(i) {
 function render() {
   const L = LESSONS[T.li], st = L.steps[T.si];
   const prog = T.progress;
-  let h = `<section class="card"><h2>Lessons</h2><ol class="lessonlist">${LESSONS.map((l, i) => `<li><button data-l="${i}" aria-current="${i === T.li}"><span class="n">${i + 1}</span><span>${esc(l.title)}</span><span class="muted small">${prog[i] ? '✓' : l.min + ' min'}</span></button></li>`).join('')}</ol></section>`;
-  h += `<section class="card"><span class="chip or">Lesson ${T.li + 1} of ${LESSONS.length}</span><h2 style="margin-top:6px">${esc(L.title)}</h2><p class="muted small" style="margin:0">${esc(L.goal)}</p>
+  // The fence card lives in the side panel and is moved into lessons that teach sensing.
+  const fc = $('fenceCard'); $('sidePanel').appendChild(fc); fc.hidden = true;
+  let h = `<section class="card"><div class="lessonbar"><select id="tLesson" aria-label="Choose a lesson">${LESSONS.map((l, i) => `<option value="${i}"${i === T.li ? ' selected' : ''}>${i + 1}. ${esc(l.title)}  ${prog[i] ? '✓' : `· ${l.min} min`}</option>`).join('')}</select><button class="btn sm" id="tPatient">Patient controls</button></div>
+    <h2 style="margin-top:10px">${esc(L.title)}</h2><p class="muted small" style="margin:0">${esc(L.goal)}</p>
     <div class="steps" aria-label="Step ${T.si + 1} of ${L.steps.length}">${L.steps.map((s, i) => `<i class="${i < T.si ? 'done' : i === T.si ? 'cur' : ''}"></i>`).join('')}</div>
-    <div class="stepbox">${st.text ? `<p>${st.text}</p>` : ''}${st.do ? `<p class="do">${esc(st.do)}</p>` : ''}${st.q ? qHTML(st.q) : ''}<div id="stepFb"></div></div>
+    <div class="stepbox">${st.text ? `<p>${st.text}</p>` : ''}${st.do ? `<p class="do">${esc(st.do)}</p>` : ''}${st.q ? qHTML(st.q) : ''}<div id="stepFb"></div></div>${L.fence ? '<div id="lessonFence"></div>' : ''}
     <div class="row" style="margin-top:10px;justify-content:space-between"><span class="row"><button class="btn sm" id="tPrev"${T.si === 0 ? ' disabled' : ''}>Back</button><button class="btn sm" id="tRestart">Restart lesson</button></span>
     <button class="btn accent" id="tNext"${T.done ? '' : ' disabled'}>${T.si === L.steps.length - 1 ? (T.li === LESSONS.length - 1 ? 'Finish' : 'Next lesson') : 'Next'}</button></div></section>`;
   $('toolPanel').innerHTML = h;
-  $('toolPanel').querySelectorAll('[data-l]').forEach(b => b.addEventListener('click', () => startLesson(+b.dataset.l)));
+  if (L.fence) { $('lessonFence').appendChild(fc); fc.hidden = false; }
+  $('tLesson').addEventListener('change', e => startLesson(+e.target.value));
+  $('tPatient').addEventListener('click', () => C.openDrawer('instDrawer'));
   $('tPrev').addEventListener('click', () => enterStep(Math.max(0, T.si - 1)));
   $('tRestart').addEventListener('click', () => startLesson(T.li));
   $('tNext').addEventListener('click', next);
@@ -2344,7 +2394,11 @@ C.hooks.slow.push(() => {
 /* ---------- init ---------- */
 C.APP.bedside = ['reseat', 'escalate', 'defib'];
 C.APP.autoLock = true;
-C.setVisibility({ events: false, expl: true, fence: true });
+C.setVisibility({ events: false, expl: false, fence: false, explCard: false });
+$('tbExpl').hidden = true;
+C.buildInstructor('Patient controls change the physiology live. Restart the lesson to return to its original patient.');
+$('instTitle').textContent = 'Patient controls';
+S.listeners.push((action, d) => { if (action === 'rap' && d && d.on === false && d.result) C.toast(`RAP ended: ${d.result}.`); });
 C.start();
 startLesson(0);
 })();
