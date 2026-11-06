@@ -3,21 +3,23 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <title>Temporary Pacing Lab: Check off</title>
 <style>
 :root{
-  --bg:#F3F5F7; --panel:#FFFFFF; --panel2:#F6F8FA; --ink:#212A34; --muted:#56616D; --line:#D7DDE3;
-  --navy:#2F5496; --orange:#BF5700; --good:#2E7D57; --amber:#A86400; --red:#B3261E; --chip:#E8EEF7; --focus:#BF5700;
-  --sans:Arial, "Helvetica Neue", Helvetica, system-ui, sans-serif;
+  --bg:#F5F3EE; --panel:#FFFFFF; --panel2:#FAF9F6; --ink:#333F48; --muted:#5C6770; --line:#D6D2C4;
+  --navy:#333F48; --orange:#BF5700; --on-accent:#FFFFFF; --good:#2E7D57; --amber:#A86400; --red:#B3261E; --chip:#ECE9E1; --focus:#BF5700;
+  --hdr:#333F48; --hdr-ink:#FFFFFF; --hdr-muted:#D6D2C4;
+  --sans:"Libre Franklin", Arial, "Helvetica Neue", Helvetica, system-ui, sans-serif;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --bg:#11161C; --panel:#1A222B; --panel2:#202A35; --ink:#E6EBF0; --muted:#9AA6B2; --line:#2E3A47;
-    --navy:#9DB8EA; --orange:#F0954A; --good:#5CC48F; --amber:#E5A94B; --red:#F07A70; --chip:#243246; --focus:#F0954A; color-scheme:dark;
+    --bg:#161B20; --panel:#20272E; --panel2:#272F37; --ink:#ECEAE4; --muted:#A7AEB4; --line:#38424B; --navy:#D6D2C4; --orange:#F8971F; --on-accent:#161B20; --good:#5CC48F; --amber:#E5A94B; --red:#F07A70; --chip:#2E3740; --focus:#F8971F; --hdr:#0F1418; --hdr-ink:#FFFFFF; --hdr-muted:#D6D2C4; color-scheme:dark;
   }
 }
-:root[data-theme="dark"]{ --bg:#11161C; --panel:#1A222B; --panel2:#202A35; --ink:#E6EBF0; --muted:#9AA6B2; --line:#2E3A47; --navy:#9DB8EA; --orange:#F0954A; --good:#5CC48F; --amber:#E5A94B; --red:#F07A70; --chip:#243246; --focus:#F0954A; color-scheme:dark; }
+:root[data-theme="dark"]{ --bg:#161B20; --panel:#20272E; --panel2:#272F37; --ink:#ECEAE4; --muted:#A7AEB4; --line:#38424B; --navy:#D6D2C4; --orange:#F8971F; --on-accent:#161B20; --good:#5CC48F; --amber:#E5A94B; --red:#F07A70; --chip:#2E3740; --focus:#F8971F; --hdr:#0F1418; --hdr-ink:#FFFFFF; --hdr-muted:#D6D2C4; color-scheme:dark; }
 :root{ box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); }
 html{ scroll-padding-top:env(safe-area-inset-top,0px); }
 *,*::before,*::after{ box-sizing:inherit; }
@@ -29,12 +31,15 @@ button,select,input,textarea{ font:inherit; color:inherit; }
 a{ color:var(--navy); }
 
 /* header */
-.top{ background:var(--panel); border-bottom:3px solid var(--orange); padding:12px 20px; display:flex; flex-wrap:wrap; gap:10px 24px; align-items:center; justify-content:space-between; }
-.top h1{ margin:0; font-size:21px; color:var(--orange); font-weight:700; }
-.top .sub{ margin:2px 0 0; font-size:13.5px; color:var(--muted); }
+.top{ background:var(--hdr); border-bottom:4px solid #BF5700; padding:12px 20px; display:flex; flex-wrap:wrap; gap:10px 24px; align-items:center; justify-content:space-between; }
+.top h1{ margin:0; font-size:22px; color:var(--hdr-ink); font-weight:800; letter-spacing:-.01em; }
+.top .sub{ margin:2px 0 0; font-size:13.5px; color:var(--hdr-muted); }
 .toolnav{ display:flex; gap:6px; flex-wrap:wrap; }
-.toolnav a, .toolnav span{ padding:7px 14px; border-radius:8px; border:1px solid var(--line); text-decoration:none; font-weight:700; font-size:14px; color:var(--navy); background:var(--panel2); }
-.toolnav span[aria-current]{ background:var(--navy); color:var(--panel); border-color:var(--navy); }
+.toolnav a, .toolnav span{ padding:7px 14px; border-radius:8px; border:1px solid var(--line); text-decoration:none; font-weight:700; font-size:14px; color:var(--hdr-ink); background:transparent; border-color:rgba(214,210,196,.45); }
+.toolnav a:hover{ border-color:#F8971F; }
+.toolnav span[aria-current]{ background:#BF5700; color:#FFFFFF; border-color:#BF5700; }
+.top .btn{ background:transparent; color:var(--hdr-ink); border-color:rgba(214,210,196,.45); }
+.top .btn:hover{ border-color:#F8971F; }
 .disclaimer{ padding:7px 20px; font-size:13px; color:var(--muted); background:var(--panel); border-bottom:1px solid var(--line); }
 .disclaimer b{ color:var(--ink); }
 footer.foot{ padding:14px 20px 26px; color:var(--muted); font-size:13px; text-align:center; }
@@ -48,15 +53,15 @@ footer.foot{ padding:14px 20px 26px; color:var(--muted); font-size:13px; text-al
 .below.wide{ grid-template-columns:1fr; } .below.wide #sidePanel{ display:none; }
 @media (max-width:900px){ .ws{ grid-template-columns:1fr; } .devcol{ position:static; align-items:center; } }
 .card{ background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:14px 16px; }
-.card h2{ margin:0 0 8px; font-size:17px; color:var(--navy); }
+.card h2{ margin:0 0 8px; font-size:17px; font-weight:700; color:var(--navy); letter-spacing:-.005em; }
 .card h3{ margin:14px 0 6px; font-size:15px; color:var(--ink); }
 .stack{ display:flex; flex-direction:column; gap:16px; min-width:0; }
 .muted{ color:var(--muted); }
 .small{ font-size:13px; }
 .btn{ min-height:36px; padding:6px 14px; border-radius:8px; border:1px solid var(--line); background:var(--panel2); color:var(--ink); cursor:pointer; font-weight:700; font-size:14px; }
 .btn:hover{ border-color:var(--navy); }
-.btn.primary{ background:var(--navy); color:#fff; border-color:var(--navy); }
-.btn.accent{ background:var(--orange); color:#fff; border-color:var(--orange); }
+.btn.primary{ background:var(--navy); color:var(--panel); border-color:var(--navy); }
+.btn.accent{ background:var(--orange); color:var(--on-accent); border-color:var(--orange); }
 .btn.sm{ min-height:30px; padding:4px 10px; font-size:13px; }
 .btn[aria-pressed="true"]{ background:var(--navy); color:var(--panel); border-color:var(--navy); }
 .btn:disabled{ opacity:.45; cursor:not-allowed; }
@@ -64,7 +69,7 @@ footer.foot{ padding:14px 20px 26px; color:var(--muted); font-size:13px; text-al
 .field{ display:flex; flex-direction:column; gap:3px; font-size:13px; color:var(--muted); }
 .field input, .field select, .field textarea{ min-height:34px; padding:5px 9px; border:1px solid var(--line); border-radius:7px; background:var(--panel2); color:var(--ink); font-size:14.5px; }
 .chip{ display:inline-block; font-size:12px; font-weight:700; padding:2px 9px; border-radius:20px; background:var(--chip); color:var(--navy); }
-.chip.or{ background:#F8E6D6; color:#8A3E00; }
+.chip.or{ background:var(--orange); color:var(--on-accent); }
 
 /* monitor */
 .monitor{ background:#03090F; border-radius:12px; border:1px solid #1B2A36; overflow:hidden; }
@@ -236,7 +241,7 @@ details.card[open] > summary{ margin-bottom:10px; }
 .scrim{ position:fixed; inset:0; background:rgba(5,12,20,.35); z-index:30; display:none; } .scrim.on{ display:block; }
 .ref h3{ font-size:16.5px; color:var(--navy); margin:18px 0 4px; } .ref p, .ref li{ font-size:14.5px; max-width:68ch; }
 .src{ display:inline-block; font-size:11.5px; font-weight:700; padding:1px 7px; border-radius:20px; margin-right:4px; }
-.src.m{ background:#DCE6F5; color:#1E3D73; } .src.g{ background:#DDF0E6; color:#1D5A3C; } .src.l{ background:#F8E6D6; color:#8A3E00; } .src.s{ background:#ECE6F5; color:#45307A; }
+.src.m{ background:#DCE6F5; color:#333F48; } .src.g{ background:#DDF0E6; color:#1D5A3C; } .src.l{ background:#F8E6D6; color:#8A3E00; } .src.s{ background:#ECE6F5; color:#45307A; }
 dialog{ border:1px solid var(--line); border-radius:12px; padding:0; background:var(--panel); color:var(--ink); max-width:min(1100px,96vw); width:100%; }
 dialog::backdrop{ background:rgba(5,12,20,.5); }
 .dlg-head{ display:flex; justify-content:space-between; align-items:center; padding:12px 16px; border-bottom:1px solid var(--line); gap:10px; flex-wrap:wrap; }
@@ -260,7 +265,7 @@ dialog::backdrop{ background:rgba(5,12,20,.5); }
     <section class="epg" id="pacer" aria-label="Simulated Medtronic 5392-style dual-chamber temporary pacemaker">
       <div class="epg-sockets" aria-hidden="true"><div class="a" data-l="A"></div><div class="v" data-l="V"></div></div>
       <div class="epg-shell">
-        <div class="epg-r1"><button class="ekey doo" id="kDOO" aria-label="DOO emergency key"><svg width="54" height="18" viewBox="0 0 54 18"><path d="M9 2 17 16H1Z" fill="none" stroke="#26313B" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 7v4M9 13v1" stroke="#26313B" stroke-width="1.6"/><text x="21" y="14" font-family="Arial" font-weight="700" font-size="12" fill="#26313B">DOO</text></svg></button>
+        <div class="epg-r1"><button class="ekey doo" id="kDOO" aria-label="DOO emergency key"><svg width="54" height="18" viewBox="0 0 54 18"><path d="M9 2 17 16H1Z" fill="none" stroke="#26313B" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 7v4M9 13v1" stroke="#26313B" stroke-width="1.6"/><text x="21" y="14" font-family="Libre Franklin, Arial, sans-serif" font-weight="700" font-size="12" fill="#26313B">DOO</text></svg></button>
           <button class="ekey" id="kOnOff" aria-label="On/off key"><svg width="20" height="20" viewBox="0 0 20 20"><path d="M6 4.5a7 7 0 1 0 8 0" fill="none" stroke="#26313B" stroke-width="2" stroke-linecap="round"/><path d="M10 2v8" stroke="#26313B" stroke-width="2" stroke-linecap="round"/></svg></button></div>
         <div class="epg-grid">
           <div class="lcd lcd-u" id="lcdU">
@@ -1591,7 +1596,7 @@ function renderStrip(ctx, W, H, tEnd, o) {
     ctx.beginPath(); ctx.moveTo(x, baseII + 3); ctx.lineTo(x, baseII - hgt); ctx.stroke();
   });
   // labels
-  ctx.font = '600 12px "Barlow Semi Condensed", "Barlow", sans-serif'; ctx.textAlign = 'center';
+  ctx.font = '600 12px "Libre Franklin", Arial, sans-serif'; ctx.textAlign = 'center';
   ctx.fillStyle = COL.text; ctx.textAlign = 'left'; ctx.fillText('II', 8, laneII.y + 15); ctx.textAlign = 'center';
   if (o.events) {
     const aLab = { sinus: 'P', paced: 'pP', tach: 'F' }, vLab = { conducted: 'R', junctional: 'J', escapeJ: 'JE', escapeV: 'VE', pvc: 'PVC', paced: 'V', fusion: 'Fu' };
@@ -1603,7 +1608,7 @@ function renderStrip(ctx, W, H, tEnd, o) {
       ctx.fillStyle = COL.warn; ctx.fillText(e.reason === 'pseudofusion' ? 'ps' : '✕', x, baseII - hgt - 4);
     });
     // device markers
-    ctx.font = '600 11px "Barlow Semi Condensed", "Barlow", sans-serif';
+    ctx.font = '600 11px "Libre Franklin", Arial, sans-serif';
     evs.filter(e => e.type === 'MK' && e.code !== 'INH').forEach(e => {
       const x = (e.t - tStart) * pxPerMs; if (x < 8 || x > W - 8) return;
       const fake = e.src === 'noise' || e.src === 'T' || e.src === 'artifact';
@@ -1657,7 +1662,7 @@ function renderStrip(ctx, W, H, tEnd, o) {
     const ms = (x2 - x1) / pxPerMs;
     if (ms > 20) {
       const txt = `${Math.round(ms)} ms · ${Math.round(60000 / ms)}/min`;
-      ctx.font = '600 13px "Barlow", sans-serif'; const tw = ctx.measureText(txt).width + 12;
+      ctx.font = '600 13px "Libre Franklin", Arial, sans-serif'; const tw = ctx.measureText(txt).width + 12;
       const bx = clamp((x1 + x2) / 2 - tw / 2, 2, W - tw - 2);
       ctx.fillStyle = 'rgba(10,22,32,.9)'; ctx.fillRect(bx, 6, tw, 22); ctx.fillStyle = '#FFE38A'; ctx.textAlign = 'left'; ctx.fillText(txt, bx + 6, 22);
     }
@@ -1728,8 +1733,8 @@ function fenceSVG(ch) {
   return `<svg viewBox="0 0 ${W} ${H + 18}" role="img" aria-label="${esc((A ? 'Atrial' : 'Ventricular') + ' channel: ' + label)}">
     <rect width="${W}" height="${base}" fill="#E6F1F8"/><rect y="${base}" width="${W}" height="${H - base + 18}" fill="#D6E3C6"/>
     ${grass}${tree(60, amp)}${bushes(115)}${tree(180, amp)}${bushes(235)}${tree(290, amp)}${fence}
-    <text x="8" y="14" font-family="Arial" font-size="12" font-weight="700" fill="#1E3D73">${A ? 'Atrial channel' : 'Ventricular channel'}</text>
-    <text x="8" y="${H + 12}" font-family="Arial" font-size="11.5" fill="${over ? '#8A3E00' : seen ? '#1D5A3C' : '#8A3E00'}">${esc(over ? `fence ${fmtSens(set)} mV is low enough to see ${bush >= set ? 'T waves (bushes)' : 'noise (grass)'}: oversensing` : label)}</text></svg>`;
+    <text x="8" y="14" font-family="Libre Franklin, Arial, sans-serif" font-size="12" font-weight="700" fill="#333F48">${A ? 'Atrial channel' : 'Ventricular channel'}</text>
+    <text x="8" y="${H + 12}" font-family="Libre Franklin, Arial, sans-serif" font-size="11.5" fill="${over ? '#8A3E00' : seen ? '#1D5A3C' : '#8A3E00'}">${esc(over ? `fence ${fmtSens(set)} mV is low enough to see ${bush >= set ? 'T waves (bushes)' : 'noise (grass)'}: oversensing` : label)}</text></svg>`;
 }
 function renderFence() { if ($('fenceCard').hidden) return; $('fenceA').innerHTML = fenceSVG('A'); $('fenceV').innerHTML = fenceSVG('V'); }
 const PICKET_COLORS = ['#FFB4A2', '#FFD6A5', '#B9E4C9', '#A0C4FF', '#CDB4DB'];
@@ -1750,17 +1755,17 @@ function fenceExplainer() {
     const mouth = mood === 'happy' ? '<path d="M26 141q6 6 12 0" fill="none" stroke="#1E2A36" stroke-width="1.6" stroke-linecap="round"/>'
       : mood === 'dizzy' ? '<circle cx="32" cy="144" r="2.6" fill="none" stroke="#1E2A36" stroke-width="1.5"/>'
       : '<path d="M27 144q2.5-2 5 0t5 0" fill="none" stroke="#1E2A36" stroke-width="1.5" stroke-linecap="round"/>';
-    const bubble = mood === 'confused' ? '<text x="58" y="138" font-size="18" font-weight="700" font-family="Arial" fill="#BF5700">?</text>' : mood === 'dizzy' ? '<text x="58" y="138" font-size="18" font-weight="700" font-family="Arial" fill="#BF5700">!</text>' : '<path d="M56 130l3 3 6-7" fill="none" stroke="#2E7D57" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>';
+    const bubble = mood === 'confused' ? '<text x="58" y="138" font-size="18" font-weight="700" font-family="Libre Franklin, Arial, sans-serif" fill="#BF5700">?</text>' : mood === 'dizzy' ? '<text x="58" y="138" font-size="18" font-weight="700" font-family="Libre Franklin, Arial, sans-serif" fill="#BF5700">!</text>' : '<path d="M56 130l3 3 6-7" fill="none" stroke="#2E7D57" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>';
     return `<rect x="14" y="123" width="36" height="32" rx="6" fill="#D7DCE1" stroke="#4A545E" stroke-width="1.3"/><rect x="19" y="120" width="7" height="4" fill="#2F6FD6"/><rect x="38" y="120" width="7" height="4" fill="#fff" stroke="#4A545E" stroke-width=".6"/><rect x="19" y="128" width="26" height="22" rx="3" fill="#EAF4EF"/>${eyes}${mouth}${bubble}`;
   };
   const panel = (top, mood, hidden, title, text, tag, cls, alt) => `<figure>
     <svg viewBox="0 0 200 160" role="img" aria-label="${alt}">
       <rect width="200" height="${B}" fill="#E4F3FF"/><circle cx="178" cy="20" r="9" fill="#FFD45C"/><rect y="${B}" width="200" height="42" fill="#BFE3A6"/>
-      <path d="${ecg}" fill="none" stroke="#233A6B" stroke-width="3.2" stroke-linejoin="round"/>
+      <path d="${ecg}" fill="none" stroke="#333F48" stroke-width="3.2" stroke-linejoin="round"/>
       ${pickets(200, top, B, 16)}
-      ${hidden ? `<path d="M68 123L80 26L92 126" fill="none" stroke="#233A6B" stroke-width="1.6" stroke-dasharray="4 3" opacity=".45"/>` : ''}
-      <text x="80" y="${hidden ? 10 : 18}" text-anchor="middle" font-size="12" font-weight="700" font-family="Arial" fill="#233A6B">QRS${hidden ? ' (hidden)' : ''}</text>
-      ${top > 94 ? '<text x="144" y="84" text-anchor="middle" font-size="11" font-weight="700" font-family="Arial" fill="#233A6B">T wave</text>' : ''}
+      ${hidden ? `<path d="M68 123L80 26L92 126" fill="none" stroke="#333F48" stroke-width="1.6" stroke-dasharray="4 3" opacity=".45"/>` : ''}
+      <text x="80" y="${hidden ? 10 : 18}" text-anchor="middle" font-size="12" font-weight="700" font-family="Libre Franklin, Arial, sans-serif" fill="#333F48">QRS${hidden ? ' (hidden)' : ''}</text>
+      ${top > 94 ? '<text x="144" y="84" text-anchor="middle" font-size="11" font-weight="700" font-family="Libre Franklin, Arial, sans-serif" fill="#333F48">T wave</text>' : ''}
       ${face(mood)}
     </svg>
     <figcaption><b>${title}</b>${text}<br><span class="tag ${cls}">${tag}</span></figcaption></figure>`;
@@ -1838,7 +1843,7 @@ function bedsideAction(kind) {
 // Frontal view of a child's chest: the patient's right is on the viewer's left. In 'teach' mode the heart and
 // labels are shown; otherwise only the skin exit sites are drawn so the diagram does not give away the answer.
 function chestSVG(cfg) {
-  const teach = cfg.mode === 'teach', bip = cfg.kind === 'bipolar', F = 'font-family="Arial"';
+  const teach = cfg.mode === 'teach', bip = cfg.kind === 'bipolar', F = 'font-family="Libre Franklin, Arial, sans-serif"';
   const coil = (x1, y1, x2, y2) => {
     const dx = x2 - x1, dy = y2 - y1, L = Math.hypot(dx, dy), nx = -dy / L, ny = dx / L; let d = '';
     for (let i = 0; i <= 60; i++) { const f = i / 60, o = Math.sin(f * Math.PI * 14) * 4 * Math.min(1, f * 8, (1 - f) * 8); d += `${i ? 'L' : 'M'}${(x1 + dx * f + nx * o).toFixed(1)} ${(y1 + dy * f + ny * o).toFixed(1)}`; }
@@ -1855,7 +1860,7 @@ function chestSVG(cfg) {
       ? `Frontal view of a child’s chest. Atrial wires attach to the right atrium and exit to the patient’s right of the sternum (viewer’s left)${bip ? '; ventricular wires attach to the ventricle and exit to the patient’s left' : '; a skin ground wire is on the patient’s left'}. Pacing cables connect them to the temporary pacemaker.`
       : `Frontal view of a child’s chest. Pair 1 exits to the patient’s right of the sternum (viewer’s left)${bip ? '; pair 2 exits to the patient’s left' : '; a skin ground wire is on the patient’s left'}.`}">
     <rect width="440" height="360" rx="10" fill="#F4F8FB"/>
-    <text x="10" y="20" font-size="12" font-weight="700" ${F} fill="#2F5496">◀ Patient’s RIGHT</text><text x="430" y="20" text-anchor="end" font-size="12" font-weight="700" ${F} fill="#2F5496">Patient’s LEFT ▶</text>
+    <text x="10" y="20" font-size="12" font-weight="700" ${F} fill="#333F48">◀ Patient’s RIGHT</text><text x="430" y="20" text-anchor="end" font-size="12" font-weight="700" ${F} fill="#333F48">Patient’s LEFT ▶</text>
     <g transform="translate(40 30)">
     <path d="M156 14 L156 44 C128 50 86 54 66 74 C52 90 50 124 56 164 L64 232 L296 232 L304 164 C310 124 308 90 294 74 C274 54 232 50 204 44 L204 14 Z" fill="#F7D9C8" stroke="#C98A72" stroke-width="1.6"/>
     <path d="M180 64 L180 176" stroke="#E7B9A4" stroke-width="7" stroke-linecap="round"/>
@@ -1979,7 +1984,7 @@ $('repCopy').addEventListener('click', async () => {
   catch (e) { const r = document.createRange(); r.selectNodeContents($('repBody')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); toast('Text selected. Press Ctrl/Cmd+C to copy.'); }
 });
 $('repClose').addEventListener('click', () => $('reportDlg').close());
-function wrapStandalone(title, body) { return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>${esc(title)}</title><style>body{font-family:Arial,Helvetica,sans-serif;max-width:900px;margin:24px auto;padding:0 16px;color:#212A34;line-height:1.45}h1{color:#BF5700;font-size:22px}h2,h3{color:#2F5496}table{border-collapse:collapse;width:100%;font-size:13.5px}td,th{border:1px solid #ccd;padding:5px 6px;text-align:left;vertical-align:top}th{background:#F3F5F7}.res-yes{color:#2E7D57;font-weight:700}.res-no{color:#B3261E;font-weight:700}</style></head><body>${body}</body></html>`; }
+function wrapStandalone(title, body) { return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>${esc(title)}</title><link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;600;700&display=swap" rel="stylesheet"><style>body{font-family:"Libre Franklin",Arial,Helvetica,sans-serif;max-width:900px;margin:24px auto;padding:0 16px;color:#333F48;line-height:1.45}h1{color:#BF5700;font-size:22px}h2,h3{color:#333F48}table{border-collapse:collapse;width:100%;font-size:13.5px}td,th{border:1px solid #ccd;padding:5px 6px;text-align:left;vertical-align:top}th{background:#F5F3EE}.res-yes{color:#2E7D57;font-weight:700}.res-no{color:#B3261E;font-weight:700}</style></head><body>${body}</body></html>`; }
 
 /* ---------- toolbar ---------- */
 const toggle = (id, key, after) => $(id).addEventListener('click', () => { if ($(id).disabled) return; APP[key] = !APP[key]; $(id).setAttribute('aria-pressed', String(APP[key])); after && after(); });
