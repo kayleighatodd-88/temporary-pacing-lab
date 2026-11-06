@@ -160,6 +160,9 @@ footer.foot{ padding:14px 20px 26px; color:var(--muted); font-size:13px; text-al
 .fence-ex figcaption b{ display:block; font-size:13px; margin-bottom:2px; }
 .fence-ex .tag{ display:inline-block; margin-top:5px; font-weight:700; font-size:12px; padding:1px 8px; border-radius:10px; color:var(--panel); }
 .fence-ex .tag.lo{ background:var(--red); } .fence-ex .tag.ok{ background:var(--good); } .fence-ex .tag.hi{ background:var(--amber); }
+.wireimg{ margin:0 auto 10px; max-width:440px; }
+.wireimg img{ width:100%; height:auto; display:block; border-radius:8px; background:#fff; }
+.wireimg figcaption{ font-size:13px; color:var(--muted); margin-top:6px; text-align:center; }
 .setup-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
 @media (max-width:520px){ .setup-grid{ grid-template-columns:1fr; } }
 .setup fieldset{ border:1px solid var(--line); border-radius:8px; padding:8px 10px; margin:0; }
@@ -1879,7 +1882,9 @@ function setupWidget(cfg) {
   // cfg.kind: 'bipolar' (A and V pairs) or 'rap' (single atrial wire + skin ground). cfg.mode: 'teach' | 'quiet'
   APP.setup = { cfg, done: false, attempts: 0, firstTry: null, polarityOk: null, tug: false, errors: [] };
   const card = $('setupCard'); card.hidden = false;
-  const chest = chestSVG(cfg);
+  const chest = cfg.mode === 'teach' && cfg.kind === 'bipolar'
+    ? `<figure class="wireimg"><img src="img/epicardial-wire-placement.webp" width="1458" height="1125" alt="Epicardial pacing lead placement: atrial wires attach to the right atrium and exit to the patient’s right of the sternum; ventricular wires attach to the ventricle and exit to the patient’s left. Pacing cables connect each pair to a dual-chamber pulse generator."><figcaption>Facing the patient, their right is on your left. <b>Pair 1</b> exits on the patient’s right; <b>Pair 2</b> on the patient’s left.</figcaption></figure>`
+    : chestSVG(cfg);
   const sel = (id, opts) => `<select id="${id}"><option value="">Choose…</option>${opts.map(o => `<option value="${o[0]}">${o[1]}</option>`).join('')}</select>`;
   let form;
   if (cfg.kind === 'bipolar') {
