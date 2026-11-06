@@ -186,6 +186,9 @@ footer.foot{ padding:14px 20px 26px; color:var(--muted); font-size:13px; text-al
 .stepbox .do{ font-weight:700; color:var(--navy); }
 .fb{ margin-top:8px; font-size:14px; padding:7px 10px; border-radius:8px; background:var(--panel); border:1px solid var(--line); }
 .fb.ok{ border-left:4px solid var(--good); } .fb.no{ border-left:4px solid var(--amber); }
+.where{ display:flex; gap:10px; align-items:center; justify-content:space-between; margin-top:8px; font-size:13px; color:var(--muted); }
+.where .btn{ flex:none; }
+.flash{ outline:4px solid var(--orange) !important; outline-offset:3px; }
 .lessonbar{ display:flex; gap:8px; align-items:center; }
 .lessonbar select{ flex:1; min-width:0; min-height:38px; padding:6px 10px; border:1px solid var(--line); border-radius:8px; background:var(--panel2); color:var(--ink); font-weight:700; font-size:14.5px; }
 #lessonFence .card.fence{ border:none; padding:0; margin-top:14px; background:transparent; }
@@ -993,7 +996,7 @@ const CASES = [
   questions: [
     MC('q1', 'Pacing vs sensing', 'Right now, what is the pacemaker doing?', ['Pacing atrium and ventricle (AV sequential)', 'Sensing intrinsic atrial and ventricular activity and withholding output', 'Pacing the atrium only', 'Failing to capture'], 1,
       'The patient’s sinus rate is faster than the programmed lower rate, so every P wave and QRS is sensed and the pacemaker inhibits. “Paced at 100” is not the same as “being paced.”', 'Look at which indicators flash, and whether any spike precedes the P waves or QRS complexes.'),
-    NUM('q2', 'Rhythm', 'What is the patient’s intrinsic ventricular rate?', 140, 8, 'bpm', 'Intrinsic sinus rhythm at about 140 bpm with 1:1 conduction.', 'Freeze the monitor and use calipers on one R–R interval: rate = 60,000 ÷ interval (ms).'),
+    MC('q2', 'Rhythm', 'What is the patient’s intrinsic ventricular rate?', ['About 140 bpm', 'About 100 bpm', 'About 70 bpm', 'About 180 bpm'], 0, 'Intrinsic sinus rhythm at about 140 with 1:1 conduction. 100 is the programmed lower rate, and 70 is the junctional escape rate that would appear only if the sinus node failed.', 'Freeze the monitor and use calipers on one R–R interval: rate = 60,000 ÷ interval (ms).'),
     MC('q3', 'Pacing vs sensing', 'Which indicator pattern confirms your answer?', ['A SENSE and V SENSE flashing; no PACE lights', 'A PACE and V PACE flashing', 'V PACE only', 'No indicators at all'], 0,
       'Sense lights mean the device detected intrinsic activity. PACE lights mean a pulse was delivered (which still does not prove capture).')
   ],
@@ -1031,8 +1034,8 @@ const CASES = [
   device: { mode: 'AAI', rate: 120, aOut: 5, aSens: 0.5 },
   questions: [
     MC('q1', 'Rhythm', 'What is the rhythm?', ['Complete heart block with a junctional escape rhythm', 'Sinus rhythm with first-degree AV block', 'Junctional ectopic tachycardia', '2:1 AV block'], 0, 'P waves march through at their own rate; narrow QRS complexes occur at a slower independent rate. No consistent PR relationship.'),
-    NUM('q2', 'Rhythm', 'Atrial rate?', 145, 10, 'bpm', 'Sinus at about 145.', 'Measure P–P. The AEG trace makes atrial activity easier to see.'),
-    NUM('q3', 'Rhythm', 'Ventricular rate?', 55, 6, 'bpm', 'Junctional escape at about 55.'),
+    MC('q2', 'Rhythm', 'Atrial rate?', ['About 145 bpm', 'About 55 bpm', 'About 120 bpm', 'About 290 bpm'], 0, 'Sinus at about 145 (measure P–P). 55 is the junctional escape (ventricular) rate in complete block; 120 is the programmed AAI rate.', 'Measure P–P. The AEG trace makes atrial activity easier to see.'),
+    MC('q3', 'Rhythm', 'Ventricular rate?', ['About 55 bpm', 'About 145 bpm', 'About 120 bpm', 'About 30 bpm'], 0, 'Junctional escape at about 55. The P waves (about 145) do not conduct, so AAI pacing at 120 cannot reach the ventricles.'),
     MC('q4', 'Modes & AV synchrony', 'Why can’t AAI fix this?', ['Atrial impulses do not conduct to the ventricles, so atrial pacing cannot increase the ventricular rate', 'AAI output is limited to 5 mA', 'AAI cannot sense P waves', 'AAI only works below 100 ppm'], 0, 'In complete heart block nothing from the atrium reaches the ventricle. Ventricular pacing is required.')
   ],
   tasks: [
@@ -1051,7 +1054,7 @@ const CASES = [
   device: { mode: 'AAI', rate: 90, aOut: 1.6, aSens: 0.5 },
   questions: [
     MC('q1', 'Capture', 'What is happening?', ['Atrial loss of capture: spikes not followed by P waves', 'Atrial undersensing', 'Atrial oversensing', 'Normal AAI function'], 0, 'Atrial spikes appear on schedule but no paced P wave follows. Sinus P waves still occur and are sensed.'),
-    NUM('q2', 'Capture', 'Measured atrial stimulation threshold (lowest output with consistent 1:1 capture)?', 2.6, 0.2, 'mA', 'The simulated threshold is 2.6 mA.', 'Rate already exceeds the intrinsic rate. Increase output until capture, decrease until it is lost, then increase until consistent capture returns.'),
+    MC('q2', 'Capture', 'Measured atrial stimulation threshold (lowest output with consistent 1:1 capture)?', ['2.6 mA', '5.2 mA', '1.6 mA', '1.0 mA'], 0, 'The simulated threshold is 2.6 mA. 5.2 mA is twice the threshold (the least you then program), and 1.6 mA was the output that was losing capture.', 'Rate already exceeds the intrinsic rate. Increase output until capture, decrease until it is lost, then increase until consistent capture returns.'),
     MC('q3', 'Capture', 'Which output setting gives the margin described in the 5392 reference guide?', ['2.6 mA (equal to threshold)', '3.0 mA', '5.2–7.8 mA (2–3× threshold)', '20 mA for every patient'], 2, 'Medtronic advises an output at least 2 to 3 times the stimulation threshold. Your local protocol governs patient-specific settings.')
   ],
   tasks: [
@@ -1072,14 +1075,14 @@ const CASES = [
   questions: [
     MC('q1', 'Capture', 'What is the problem?', ['Ventricular loss of capture', 'Ventricular oversensing', 'Atrial undersensing', 'Upper rate behavior'], 0, 'Ventricular spikes follow sensed P waves on time, but no paced QRS follows. Only slow wide escape beats perfuse the patient.'),
     MC('q2', 'Safety & escalation', 'What comes first?', ['Increase V output right away to restore capture, then investigate', 'Perform a sensing threshold test', 'Turn the pacemaker off to see the underlying rhythm', 'Switch to AAI'], 0, 'In a pacing-dependent patient, restore effective ventricular capture immediately. Threshold testing comes after the patient is stable.'),
-    NUM('q3', 'Capture', 'Measured ventricular stimulation threshold?', 3.4, 0.2, 'mA', 'The simulated threshold is 3.4 mA.', 'Test quickly in a dependent patient and watch the arterial waveform.'),
+    MC('q3', 'Capture', 'Measured ventricular stimulation threshold?', ['3.4 mA', '6.8 mA', '2.0 mA', '1.5 mA'], 0, 'The simulated threshold is 3.4 mA. 6.8 mA is twice the threshold (what you program), and 2.0 mA was the output when capture was lost.', 'Test quickly in a dependent patient and watch the arterial waveform.'),
     MC('q4', 'Safety & escalation', 'Beyond the pacemaker settings, what is appropriate?', ['Notify the responsible provider/EP and have transcutaneous pacing and a defibrillator immediately available', 'No escalation needed once capture returns', 'Remove the pacing wires', 'Increase the atrial output only'], 0, 'Rising thresholds in a dependent patient warrant escalation and a backup plan: thresholds can keep rising and wires can fail.')
   ],
   tasks: [
     T('t1', 'Safety & escalation', 'Restore ventricular capture promptly (within 30 s for full credit).', 'Turn the V OUTPUT dial clockwise until each V spike produces a wide paced QRS and the arterial waveform improves.', S => { const f = H.firstTime(S, e => e.type === 'VP' && e.captured); return f == null ? 0 : f <= 30000 ? 1 : f <= 60000 ? 0.5 : 0.25; }),
     T('t2', 'Capture', 'Perform a ventricular threshold test (capture → loss → capture).', 'Decrease V output a step at a time until a spike has no QRS, then increase until 1:1 capture returns.', S => H.thresholdSweep(S, 'VP') ? 1 : 0),
     T('t3', 'Capture', 'Set final V output at least 2× the threshold.', '', S => S.d.vOut >= 2 * S.p.vThr ? 1 : S.d.vOut >= 1.5 * S.p.vThr ? 0.5 : 0),
-    T('t4', 'Safety & escalation', 'Arrange backup: escalate and/or bring transcutaneous pacing and a defibrillator to the bedside.', 'Use the bedside actions under the pacemaker.', S => (H.bedside(S, 'escalate') || H.bedside(S, 'defib')) ? 1 : 0)
+    T('t4', 'Safety & escalation', 'Arrange backup: escalate and/or bring transcutaneous pacing and a defibrillator to the bedside.', 'In the Bedside actions card next to the case, press “Escalate to provider / EP” and/or “Defibrillator / transcutaneous pacing ready”.', S => (H.bedside(S, 'escalate') || H.bedside(S, 'defib')) ? 1 : 0)
   ],
   debrief: '<p>Loss of ventricular capture in a patient with complete heart block is an emergency: the only perfusing rhythm is the escape rhythm (here ~38 bpm). Restore capture first (higher output, or Emergency DOO if needed), then measure the threshold and set at least a 2–3× margin. Electrical capture does not guarantee mechanical output: confirm with the arterial waveform or pulse oximetry.</p>'
 },
@@ -1092,7 +1095,7 @@ const CASES = [
   device: { mode: 'AAI', rate: 90, aOut: 5, aSens: 4 },
   questions: [
     MC('q1', 'Sensing', 'What is the problem?', ['Atrial undersensing', 'Atrial loss of capture', 'Atrial oversensing', 'Normal function'], 0, 'Intrinsic P waves are not sensed, so the pacemaker paces on its own schedule and competes with sinus rhythm. Some spikes capture, others fall in refractory atrium.'),
-    NUM('q2', 'Sensing', 'Atrial sensing threshold (least sensitive setting at which P waves are still sensed)?', 1.5, 0.3, 'mV', 'Sensing stops above 1.5 mV in this patient, so the sensing threshold is 1.5 mV.', 'With rate below intrinsic and output minimal, increase the mV number until A SENSE stops flashing, then decrease until it starts again.'),
+    MC('q2', 'Sensing', 'Atrial sensing threshold (least sensitive setting at which P waves are still sensed)?', ['1.5 mV', '0.7 mV', '4 mV', '0.5 mV'], 0, 'Sensing stops above 1.5 mV, so the threshold is 1.5 mV. Program half or less (0.7 mV or lower). 4 mV was the setting that caused the undersensing.', 'With rate below intrinsic and output minimal, increase the mV number until A SENSE stops flashing, then decrease until it starts again.'),
     MC('q3', 'Sensing', 'Which setting gives at least a 2:1 sensing safety margin?', ['3.0 mV', '1.5 mV', '0.7 mV or lower (half the threshold or less)', 'ASYNC'], 2, 'Set sensitivity to half (or less) of the threshold value in mV. Lower mV = more sensitive.'),
     MC('q4', 'Sensing', 'Changing A sensitivity from 4.0 mV to 0.5 mV makes the pacemaker…', ['More sensitive', 'Less sensitive', 'Pace with more energy', 'No different'], 0, 'The mV value is the smallest signal the device will recognize. A smaller number means smaller signals are detected: more sensitive.')
   ],
@@ -1132,8 +1135,8 @@ const CASES = [
   patient: { age: 'infant', rhythm: 'junctional', junctionalRate: 118, atrialRate: 96, av: 'intact', pr: 120, maxCond: 220, escape: 'none', aAmp: 2.4, vAmp: 8, aThr: 1.2, vThr: 1.8, conceal: 0.9 },
   device: { mode: 'AAI', rate: 140, aOut: 4, aSens: 0.5 },
   questions: [
-    NUM('q1', 'Rhythm', 'Intrinsic atrial rate?', 96, 8, 'bpm', 'Sinus P waves at about 96.', 'The AEG trace shows atrial activity clearly.'),
-    NUM('q2', 'Rhythm', 'Intrinsic ventricular rate?', 118, 8, 'bpm', 'Junctional rhythm at about 118.'),
+    MC('q1', 'Rhythm', 'Intrinsic atrial rate?', ['About 96 bpm', 'About 118 bpm', 'About 140 bpm', 'About 60 bpm'], 0, 'Sinus P waves at about 96. 118 is the junctional rhythm, and 140 is the programmed AAI rate.', 'The AEG trace shows atrial activity clearly.'),
+    MC('q2', 'Rhythm', 'Intrinsic ventricular rate?', ['About 118 bpm', 'About 96 bpm', 'About 140 bpm', 'About 60 bpm'], 0, 'Junctional rhythm at about 118, faster than the sinus rate (about 96), so the ventricles follow the junction.'),
     MC('q3', 'Rhythm', 'Underlying rhythm?', ['Junctional (accelerated junctional) rhythm with AV dissociation', 'Sinus rhythm', 'Complete heart block', 'Atrial flutter'], 0, 'Narrow QRS complexes faster than, and independent of, the sinus P waves.'),
     MC('q4', 'Rhythm', 'Is antegrade AV conduction present?', ['Yes: atrial-paced beats conduct with a constant PR', 'No: complete AV block', 'Cannot be judged', 'Only retrograde'], 0, 'When the atrium is paced faster than the junction, each paced P conducts. Dissociation here is from a competing junctional focus, not block.'),
     MC('q5', 'Rhythm', 'Is the patient pacing-dependent?', ['No: an adequate intrinsic rhythm appears', 'Yes: no intrinsic rhythm', 'Yes, because the rhythm is junctional', 'Cannot tell'], 0, 'A junctional rhythm at 118 is present when pacing is withdrawn, though AV synchrony is lost.')
@@ -1175,7 +1178,7 @@ const CASES = [
   device: { mode: 'DDI', rate: 60, aOut: 10, vOut: 10, aSens: 0.5, vSens: 2 },
   questions: [
     MC('q1', 'Rhythm', 'Rhythm?', ['Atrial flutter / IART with 2:1 AV conduction', 'Sinus tachycardia', 'JET', 'Atrial fibrillation'], 0, 'Regular atrial activity near 280 with every second beat conducted.'),
-    NUM('q2', 'Rhythm', 'Atrial rate?', 280, 20, 'bpm', 'About 280.', 'Use the AEG and calipers on consecutive atrial deflections.'),
+    MC('q2', 'Rhythm', 'Atrial rate?', ['About 280 bpm', 'About 140 bpm', 'About 72 bpm', 'About 350 bpm'], 0, 'About 280 on the atrial ECG. The ventricular rate is about 140 because of 2:1 AV conduction.', 'Use the AEG and calipers on consecutive atrial deflections.'),
     MC('q3', 'Safety & escalation', 'Before delivering RAP, what must you verify?', ['The atrial wires are connected to the atrial channel (not the ventricle) and a defibrillator is immediately available', 'V output is at maximum', 'Pause is held', 'Nothing'], 0, 'The 5392 guide: RAP is for atrial use only; verify atrial lead placement and connection; have defibrillation equipment immediately available.'),
     MC('q4', 'Overdrive & RAP', 'What outcomes are possible after RAP?', ['Termination, no effect, acceleration, or degeneration to atrial fibrillation', 'It always terminates flutter', 'It is the same as atrial pacing for JET', 'It cannot affect the ventricles'], 0, 'RAP may interrupt some atrial tachycardias but can also induce, accelerate or degenerate them.')
   ],
@@ -1201,8 +1204,8 @@ const CASES = [
   ],
   tasks: [
     T('t1', 'Troubleshooting', 'Check and reseat the connections.', 'Bedside actions → Reseat connections.', S => H.bedside(S, 'reseat') ? 1 : 0),
-    T('t2', 'Safety & escalation', 'Escalate to the responsible provider / EP.', 'Bedside actions.', S => H.bedside(S, 'escalate') ? 1 : 0),
-    T('t3', 'Safety & escalation', 'Have transcutaneous pacing and a defibrillator available.', 'Bedside actions.', S => H.bedside(S, 'defib') ? 1 : 0),
+    T('t2', 'Safety & escalation', 'Escalate to the responsible provider / EP.', 'In the Bedside actions card next to the case, press “Escalate to provider / EP”.', S => H.bedside(S, 'escalate') ? 1 : 0),
+    T('t3', 'Safety & escalation', 'Have transcutaneous pacing and a defibrillator available.', 'In the Bedside actions card next to the case, press “Defibrillator / transcutaneous pacing ready”.', S => H.bedside(S, 'defib') ? 1 : 0),
     T('t4', 'Troubleshooting', 'Confirm stable ventricular capture afterward (10 consecutive captured V pulses, no open-circuit events in 10 s).', '', S => { const r = H.recent(S, 10000); return (H.capturedStreak(S, 'VP').cur >= 10 && !r.some(e => e.type === 'VP' && e.reason === 'open')) ? 1 : 0; })
   ],
   debrief: '<p>Pacing system problems include loose connections, cable damage, lead fracture and dislodgement. Clues: PACE indicator without a spike (open circuit), spikes without capture despite generous output, and artifact that is oversensed. Settings changes may mask a hardware problem without fixing it. Follow wires from patient to pacemaker, check for crossed atrial and ventricular connections, and escalate.</p><p>Instructors can switch the wire to “fractured” (reseating does not help) or “dislodged.”</p>'
@@ -1823,7 +1826,7 @@ const BEDSIDE = {
   family: 'Explain procedure to child and family', equipment: 'Gather equipment and supplies', secure: 'Secure pacemaker (IV pole / strap)', disconnect: 'Disconnect cable from pacing wires'
 };
 function renderBedside() {
-  $('bedsideBtns').innerHTML = APP.bedside.map(k => `<button class="btn sm" data-bedside="${k}">${BEDSIDE[k]}</button>`).join('');
+  $('bedsideBtns').innerHTML = APP.bedside.map(k => `<button class="btn sm" id="bs_${k}" data-bedside="${k}">${BEDSIDE[k]}</button>`).join('');
   $('bedsideBtns').querySelectorAll('[data-bedside]').forEach(b => b.addEventListener('click', () => bedsideAction(b.dataset.bedside)));
 }
 function bedsideAction(kind) {
@@ -2184,8 +2187,8 @@ const LESSONS = [
   device: { mode: 'DDD', rate: 80 }, setup: 'bipolar',
   steps: [
     { hl: ['setupCard'], text: 'Epicardial wires are placed in the OR. <b>Wires exiting to the patient’s RIGHT of the sternum are atrial; wires to the LEFT are ventricular.</b> Look at the diagram from the foot of the bed: the patient’s right is on your left. It takes two wires to complete a circuit. The <b>(−) terminal is the pacing pole</b>.' },
-    { hl: ['setupCard'], do: 'Identify each pair and connect it: chamber, socket (A is blue, V is white) and polarity, then press Connect.', check: () => C.APP.setup && C.APP.setup.done },
-    { hl: ['setupCard'], do: 'Tug-test the connections.', check: () => C.APP.setup && C.APP.setup.tug, ok: 'The 5392 cable clicks when fully inserted; a gentle pull confirms it.' },
+    { hl: ['setupCard', 'su_go'], do: 'In the “Identify and connect the pacing wires” card (beside this lesson), set Pair 1 and Pair 2: the chamber, the cable socket (A is blue, V is white) and which terminal the marked (−) wire goes to. Then press Connect.', check: () => C.APP.setup && C.APP.setup.done },
+    { hl: ['su_tug'], do: 'In the same card, press “Tug test connections” to confirm each cable is fully seated.', check: () => C.APP.setup && C.APP.setup.tug, ok: 'The 5392 cable clicks when fully inserted; a gentle pull confirms it.' },
     { text: 'Troubleshooting from your slides: if pacing wires aren’t working, check every connection and try switching the poles. If you can’t see P waves, record an atrial ECG from the atrial wires. Turn on the Atrial ECG trace under the monitor to see one.' }
   ]
 },
@@ -2201,8 +2204,8 @@ const LESSONS = [
     { q: { type: 'mc', prompt: 'Why can’t AAI help this patient?', options: ['Atrial impulses do not conduct to the ventricles, so pacing the atrium cannot raise the ventricular rate', 'The output is too low', 'AAI cannot sense P waves', 'The rate is too high'], answer: 0, explain: 'In complete heart block nothing from the atrium reaches the ventricle. Ventricular pacing is required.' } },
     { hl: ['lcdL', 'kUp', 'kDown', 'kEnter'], do: 'Change to DDD: highlight Mode Selection and press ENTER, highlight DDD, press ENTER.', check: () => S.d.mode === 'DDD' && H.trackedStreak(S) >= 4, ok: 'AS–VP: each sensed P wave is followed by a ventricular pacing spike after the A-V interval. AV synchrony is restored at the sinus rate.' },
     { text: 'Your DDD starting point for children (slide 26): lower rate 80, upper rate 180, A-V interval 80–120 ms, PVARP 200 ms, A sensitivity 0.5 mV, V sensitivity 2.0 mV. Then check thresholds and sensing for each chamber.' },
-    { do: 'Now select VVI and watch the arterial pressure for about 6 seconds.', check: () => { const l = S.log.filter(x => x.action === 'mode').pop(); return S.d.mode === 'VVI' && l && S.t - l.t > 6000; }, ok: 'VVI supports ventricular rate but loses AV synchrony: the atrial “kick” is gone and pressure falls.' },
-    { do: 'Return to DDD.', check: () => S.d.mode === 'DDD' }
+    { hl: ['lcdL', 'kUp', 'kDown', 'kEnter', 'tbART'], do: 'Now select VVI (lower screen: highlight Mode Selection, ENTER, highlight VVI, ENTER) and watch the arterial line for about 6 seconds.', check: () => { const l = S.log.filter(x => x.action === 'mode').pop(); return S.d.mode === 'VVI' && l && S.t - l.t > 6000; }, ok: 'VVI supports ventricular rate but loses AV synchrony: the atrial “kick” is gone and pressure falls.' },
+    { hl: ['lcdL', 'kUp', 'kDown', 'kEnter'], do: 'Return to DDD the same way (Mode Selection → DDD → ENTER).', check: () => S.d.mode === 'DDD' }
   ]
 },
 {
@@ -2213,7 +2216,7 @@ const LESSONS = [
   steps: [
     { text: '<b>Every day, three questions, in this order:</b><br>1. What is the underlying rate and rhythm?<br>2. What is the capture threshold? (set ×2)<br>3. Only if stable enough: what is the sensing threshold? (set ÷2)<br><br>This infant is AAI paced at 140. What is underneath?' },
     { hl: ['knRate'], do: 'Lower the RATE gradually, a few ppm at a time, while watching the ECG and arterial line, until A SENSE flashes and the patient’s own P waves lead.', check: () => S.d.rate < 108 && histSince(e => e.type === 'MK' && e.code === 'AS').length >= 3, ok: 'Gradual reduction lets you stop at the first sign the patient is not tolerating it.' },
-    { hl: ['tbFreeze'], q: { type: 'num', prompt: 'Freeze the screen and drag calipers across one P–P interval. What is the intrinsic atrial rate?', answer: 112, tol: 8, unit: 'bpm', explain: 'Rate = 60,000 ÷ interval in ms. About 112.' } },
+    { hl: ['tbFreeze'], q: { type: 'mc', prompt: 'Press Freeze screen (under the monitor) and drag the calipers across one P–P interval. What is the intrinsic atrial rate?', options: ['About 112 bpm', 'About 140 bpm', 'About 60 bpm', 'About 75 bpm'], answer: 0, explain: 'About 112: rate = 60,000 ÷ the P–P interval in ms (about 535 ms). 140 is the pacemaker’s programmed rate, not the patient’s own rhythm, and 60 is the junctional escape rate.' } },
     { q: { type: 'mc', prompt: 'What is the underlying rhythm?', options: ['Sinus rhythm with intact AV conduction', 'Junctional rhythm', 'Complete heart block', 'Atrial flutter'], answer: 0, explain: 'Every P wave is followed by a QRS with a constant PR interval.' } },
     { hl: ['kPause'], text: 'The 5392 also lets you <b>hold Pause</b> to suspend pacing and sensing for up to 10 s. That is abrupt: in a patient who may be pacing-dependent, use gradual rate reduction instead and be ready to resume pacing immediately.' },
     { hl: ['knRate'], do: 'Return the rate to 140 ppm.', check: () => S.d.rate >= 138 && S.d.mode === 'AAI' }
@@ -2229,7 +2232,7 @@ const LESSONS = [
     { hl: ['knRate'], do: 'Set the rate about 10 above the intrinsic rate (at least 105 ppm) so the atrium is paced.', check: () => S.d.rate >= 105 && capStreakSince('AP') >= 3, ok: 'Every spike is followed by a P wave: 1:1 capture at a high output.' },
     { hl: ['knA', 'tbEvents'], do: 'Decrease A OUTPUT one click at a time, watching the monitor, until a spike is NOT followed by a P wave.', check: () => histSince(e => e.type === 'AP' && e.reason === 'threshold').length > 0, ok: 'Loss of capture: the PACE light still flashed, but no P wave followed the spike.' },
     { hl: ['knA'], do: 'Increase A OUTPUT until every spike captures again (1:1).', check: () => capStreakSince('AP') >= 4 },
-    { q: { type: 'num', prompt: 'What is the atrial capture threshold?', answer: 2.2, tol: 0.15, unit: 'mA', explain: 'The lowest output that gives consistent 1:1 capture: 2.2 mA.' } },
+    { q: { type: 'mc', prompt: 'What is the atrial capture threshold?', options: ['2.2 mA', '4.4 mA', '10 mA', '1.2 mA'], answer: 0, explain: '2.2 mA is the lowest output that gives consistent 1:1 capture. 4.4 mA is twice the threshold: the safety value you set next, not the threshold itself. 10 mA was the starting output.' } },
     { hl: ['knA'], do: 'Set A output to at least 2× the threshold.', check: () => S.d.aOut >= 4.4, ok: 'Example from your slides: captures at 3 mA, leave at 6 mA. The 5392 guide says 2 to 3 times.' },
     { hl: ['knRate'], do: 'Reset the rate to the prescribed 90 ppm.', check: () => S.d.rate <= 92 }
   ]
@@ -2243,7 +2246,7 @@ const LESSONS = [
     { text: 'This infant has complete heart block: every ventricular beat is already paced, so the paced rhythm is present. <b>Work quickly.</b> When capture is lost, the only perfusing rhythm is a slow escape. Watch the arterial line. (If AV conduction is intact, shorten the A-V interval so the ventricle is paced during testing.)' },
     { hl: ['knV'], do: 'Decrease V OUTPUT until a ventricular spike is not followed by a QRS.', check: () => histSince(e => e.type === 'VP' && e.reason === 'threshold').length > 0 },
     { hl: ['knV'], do: 'Immediately increase V OUTPUT until every spike captures (1:1).', check: () => capStreakSince('VP') >= 4 },
-    { q: { type: 'num', prompt: 'What is the ventricular capture threshold?', answer: 1.8, tol: 0.15, unit: 'mA', explain: '1.8 mA.' } },
+    { q: { type: 'mc', prompt: 'What is the ventricular capture threshold?', options: ['1.8 mA', '3.6 mA', '8 mA', '0.8 mA'], answer: 0, explain: '1.8 mA is the lowest output with consistent 1:1 ventricular capture. 3.6 mA is twice the threshold, the value you program next. 8 mA was the starting output.' } },
     { hl: ['knV'], do: 'Set V output to at least 2× the threshold.', check: () => S.d.vOut >= 3.6 }
   ]
 },
@@ -2258,7 +2261,7 @@ const LESSONS = [
     { hl: ['knA'], do: 'Turn A OUTPUT to the lowest non-zero setting, 0.1 mA, so a missed beat can’t trigger a competitive pulse.', check: () => S.d.aOut > 0 && S.d.aOut <= 0.2 },
     { hl: ['lcdL', 'knDial', 'fenceCard'], do: 'Highlight A Sensitivity. Turn the menu dial counterclockwise (bigger mV, higher fence) until A SENSE stops flashing and A PACE starts.', check: () => { const ok = typeof S.d.aSens === 'number' && S.d.aSens > S.p.aAmp; if (ok) T.mem.raised = true; return ok; }, ok: 'The fence is now taller than the P waves: the pacemaker cannot see them (undersensing).' },
     { hl: ['knDial', 'fenceCard'], do: 'Turn clockwise (smaller mV) until A SENSE flashes with every P wave again and PACE stops.', check: () => typeof S.d.aSens === 'number' && S.d.aSens <= S.p.aAmp && recent(3000, e => e.type === 'MK' && e.code === 'AS').length >= 2 },
-    { q: { type: 'num', prompt: 'What is the atrial sensing threshold (least sensitive setting that still senses every P wave)?', answer: 2.0, tol: 0.25, unit: 'mV', explain: 'Sensing stops above 2.0 mV, so the threshold is 2.0 mV.' } },
+    { q: { type: 'mc', prompt: 'What is the atrial sensing threshold (the least sensitive setting that still senses every P wave)?', options: ['2.0 mV', '1.0 mV', '0.5 mV', '4.0 mV'], answer: 0, explain: 'Sensing stops above 2.0 mV, so 2.0 mV is the threshold. 1.0 mV is half of it: the value you program for a 2:1 safety margin. 0.5 mV is the usual atrial default.' } },
     { hl: ['knDial'], do: 'Set A sensitivity to half the threshold or less (1.0 mV or lower).', check: () => typeof S.d.aSens === 'number' && S.d.aSens <= 1.0, ok: 'Example from your slides: senses at 6 mV, set 3 mV. Typical defaults are 0.5 mV (A) and 2.0 mV (V). Some attendings prefer one-third of threshold: follow local practice.' },
     { hl: ['knA', 'knRate'], do: 'Restore A output (5 mA) and the rate (100 ppm).', check: () => S.d.aOut >= 5 && S.d.rate >= 100 },
     { text: 'Test the ventricular channel the same way, separately: rate 10 below intrinsic, V output to minimum, raise V sensitivity until V SENSE stops, lower until it returns, set half. For V, you want to see the trees (QRS) but not the bushes (P and T waves).' }
@@ -2274,7 +2277,7 @@ const LESSONS = [
     { hl: ['fenceCard'], q: { type: 'mc', prompt: 'What is happening?', options: ['Oversensing: the fence is so low the pacemaker sees noise and T waves and withholds pacing', 'Loss of capture', 'Undersensing', 'Battery failure'], answer: 0, explain: 'Oversensing gives underpacing. Expected spikes are missing.' } },
     { hl: ['lcdL', 'knDial'], do: 'Raise V sensitivity (higher fence) until noise is not sensed, staying well below the QRS: 2.0–3.5 mV.', check: () => typeof S.d.vSens === 'number' && S.d.vSens >= 2 && S.d.vSens <= 3.5 && !recent(5000, e => e.type === 'MK' && e.code === 'VS' && (e.src === 'noise' || e.src === 'T')).length },
     { enter: () => { S.setPatient({ aAmp: 0.9 }, 'lesson', true); S.setDevice({ aSens: 2 }, 'lesson'); }, hl: ['fenceCard', 'knDial'], do: 'Now the P waves are smaller and A sensitivity is 2.0 mV. The atrium is being paced over the patient’s own P waves (undersensing = overpacing). Lower the A sensitivity number until every P wave is sensed.', check: () => typeof S.d.aSens === 'number' && S.d.aSens <= 0.8 && !recent(4000, e => e.type === 'A' && e.sensed === 'under').length },
-    { enter: () => { S.setPatient({ vConn: 'loose', vNoise: 0 }, 'lesson', true); }, hl: ['bedsideCard'], do: 'Pacing is now erratic: the V PACE light sometimes flashes with no spike at all. That is an open circuit, not a threshold problem. Use Bedside actions to reseat the connections.', check: () => since(l => l.action === 'bedside' && l.kind === 'reseat') && S.p.vConn === 'on', ok: 'Systematic hardware check: follow the wires from patient to cable to pacemaker. Escalate if a wire itself is the problem.' }
+    { enter: () => { S.setPatient({ vConn: 'loose', vNoise: 0 }, 'lesson', true); }, hl: ['bs_reseat'], do: 'Pacing is now erratic: the V PACE light sometimes flashes with no spike at all. That is an open circuit, not a threshold problem. In the “Bedside actions” card (beside this lesson), press “Reseat cable connections”.', check: () => since(l => l.action === 'bedside' && l.kind === 'reseat') && S.p.vConn === 'on', ok: 'Systematic hardware check: follow the wires from patient to cable to pacemaker. Escalate if a wire itself is the problem.' }
   ]
 },
 {
@@ -2284,8 +2287,8 @@ const LESSONS = [
   device: { mode: 'DDI', rate: 60, aOut: 10, vOut: 10 },
   steps: [
     { text: 'Rapid atrial pacing is used to convert <b>re-entrant</b> atrial tachycardias (atrial flutter, SVT). Automatic rhythms like JET are only transiently suppressed. <b>Always verify the atrial wires are on the atrial channel</b>: rapid pacing of the ventricle can cause VF. RAP may also accelerate a tachycardia or cause fibrillation.' },
-    { hl: ['bedsideCard'], do: 'Bring the defibrillator to the bedside.', check: () => since(l => l.action === 'bedside' && l.kind === 'defib') },
-    { hl: ['tbFreeze', 'tbAEG'], q: { type: 'num', prompt: 'Use the atrial ECG and calipers: what is the atrial rate?', answer: 280, tol: 20, unit: 'bpm', explain: 'Flutter at about 280 with 2:1 conduction (ventricular rate about 140).' } },
+    { hl: ['bs_defib'], do: 'Get the defibrillator and pads to the bedside: in the “Bedside actions” card (beside this lesson), press “Defibrillator / transcutaneous pacing ready”.', check: () => since(l => l.action === 'bedside' && l.kind === 'defib') },
+    { hl: ['tbFreeze', 'tbAEG'], q: { type: 'mc', prompt: 'Use the Atrial ECG trace and the calipers: what is the atrial rate?', options: ['About 280 bpm', 'About 140 bpm', 'About 72 bpm', 'About 350 bpm'], answer: 0, explain: 'About 280: count the flutter deflections on the atrial ECG. 140 is the ventricular rate (2:1 conduction), and about 350 is the RAP rate you will choose (20–30% faster than the flutter).' } },
     { hl: ['knA'], do: 'Set A output to 20 mA (maximal output promotes capture at fast rates).', check: () => S.d.aOut >= 20 },
     { hl: ['lcdL', 'kUp', 'kDown', 'kEnter'], do: 'Open the RAP screen: highlight Rapid Atrial Pacing and press ENTER.', check: () => C.APP.lower.screen === 'rap', ok: 'The 5392 opens RAP at 250 ppm (range 80–800). Pacing continues at current settings until you hold ENTER. (Your slide notes mention MENU/SELECT and a default of 320: that describes an older model. The 5392 uses the arrow keys and ENTER.)' },
     { hl: ['knDial'], do: 'Set the RAP rate 20–30% faster than the atrial rate (about 340–360 ppm).', check: () => S.d.rapRate >= 330 && S.d.rapRate <= 370 },
@@ -2325,6 +2328,26 @@ const LESSONS = [
 }
 ];
 
+// Plain-language location of each control a step can point to; shown under the step with a "Show me" button.
+const WHERE = {
+  knRate: 'RATE dial: top knob on the right side of the pacemaker', knA: 'A OUTPUT dial: second knob on the pacemaker', knV: 'V OUTPUT dial: third knob on the pacemaker',
+  knDial: 'Menu parameter dial: the MENU DIAL knob near the bottom of the pacemaker', lcdL: 'Lower screen of the pacemaker', lcdU: 'Upper screen of the pacemaker',
+  kUp: '▲ and ▼ keys on the right side of the pacemaker', kEnter: 'ENTER key (↵) on the right side of the pacemaker', kLock: 'Lock key (key symbol) on the right side of the pacemaker',
+  kPause: 'PAUSE key at the bottom right of the pacemaker', kDOO: 'DOO emergency key at the top of the pacemaker', kOnOff: 'On/off key at the top right of the pacemaker',
+  setupCard: '“Identify and connect the pacing wires” card, next to this lesson', su_go: '“Connect” button at the bottom of the wires card', su_tug: '“Tug test connections” button in the wires card',
+  bedsideCard: '“Bedside actions” card, next to this lesson', bs_defib: '“Defibrillator / transcutaneous pacing ready” button in the Bedside actions card',
+  bs_reseat: '“Reseat cable connections” button in the Bedside actions card', bs_escalate: '“Escalate to provider / EP” button in the Bedside actions card',
+  fenceCard: 'Fence diagram, further down in this lesson', tbEvents: '“Show electrical events” button under the monitor',
+  tbFreeze: '“Freeze screen” button under the monitor (then drag across the monitor for calipers)', tbAEG: '“Atrial ECG” trace on the monitor', tbART: 'Arterial line (red trace) on the monitor'
+};
+function showMe(ids) {
+  const els = ids.map(id => $(id)).filter(el => el && !el.closest('[hidden]'));
+  if (!els.length) return;
+  const smooth = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  els[0].scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'center' });
+  els.forEach(el => { el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 2200); });
+}
+
 /* ---------- rendering ---------- */
 function startLesson(i) {
   T.li = i; const L = LESSONS[i];
@@ -2333,7 +2356,7 @@ function startLesson(i) {
   enterStep(0);
 }
 function enterStep(i) {
-  T.si = i; T.done = false; T.enterT = S.t; T.logIdx = S.log.length; T.answered = null;
+  T.si = i; T.done = false; T.enterT = S.t; T.logIdx = S.log.length; T.answered = null; T.tries = 0;
   const st = LESSONS[T.li].steps[i];
   if (st.enter) st.enter();
   C.highlight(st.hl || []);
@@ -2348,7 +2371,7 @@ function render() {
   let h = `<section class="card"><div class="lessonbar"><select id="tLesson" aria-label="Choose a lesson">${LESSONS.map((l, i) => `<option value="${i}"${i === T.li ? ' selected' : ''}>${i + 1}. ${esc(l.title)}  ${prog[i] ? '✓' : `· ${l.min} min`}</option>`).join('')}</select><button class="btn sm" id="tPatient">Patient controls</button></div>
     <h2 style="margin-top:10px">${esc(L.title)}</h2><p class="muted small" style="margin:0">${esc(L.goal)}</p>
     <div class="steps" aria-label="Step ${T.si + 1} of ${L.steps.length}">${L.steps.map((s, i) => `<i class="${i < T.si ? 'done' : i === T.si ? 'cur' : ''}"></i>`).join('')}</div>
-    <div class="stepbox">${st.text ? `<p>${st.text}</p>` : ''}${st.do ? `<p class="do">${esc(st.do)}</p>` : ''}${st.q ? qHTML(st.q) : ''}<div id="stepFb"></div></div>${L.fence ? '<div id="lessonFence"></div>' : ''}
+    <div class="stepbox">${st.text ? `<p>${st.text}</p>` : ''}${st.do ? `<p class="do">${esc(st.do)}</p>` : ''}${st.do && st.hl && st.hl.some(id => WHERE[id]) ? `<div class="where"><span><b>Where:</b> ${st.hl.map(id => WHERE[id]).filter(Boolean).map(esc).join(' · ')}</span><button class="btn sm" id="tShow">Show me</button></div>` : ''}${st.q ? qHTML(st.q) : ''}<div id="stepFb"></div></div>${L.fence ? '<div id="lessonFence"></div>' : ''}
     <div class="row" style="margin-top:10px;justify-content:space-between"><span class="row"><button class="btn sm" id="tPrev"${T.si === 0 ? ' disabled' : ''}>Back</button><button class="btn sm" id="tRestart">Restart lesson</button></span>
     <button class="btn accent" id="tNext"${T.done ? '' : ' disabled'}>${T.si === L.steps.length - 1 ? (T.li === LESSONS.length - 1 ? 'Finish' : 'Next lesson') : 'Next'}</button></div></section>`;
   $('toolPanel').innerHTML = h;
@@ -2358,11 +2381,18 @@ function render() {
   $('tPrev').addEventListener('click', () => enterStep(Math.max(0, T.si - 1)));
   $('tRestart').addEventListener('click', () => startLesson(T.li));
   $('tNext').addEventListener('click', next);
+  const sm = $('tShow'); if (sm) sm.addEventListener('click', () => showMe(st.hl));
   const sb = $('qSubmit'); if (sb) sb.addEventListener('click', () => submitQ(st.q));
   updateFb();
 }
+// Show options in a stable shuffled order so the correct answer is not always first.
+function optOrder(q) {
+  let h = 0; for (const ch of q.prompt) h = (Math.imul(h, 31) + ch.charCodeAt(0)) | 0;
+  const key = i => { let x = (h + Math.imul(i + 1, 0x9E3779B9)) | 0; x = Math.imul(x ^ x >>> 16, 0x45D9F3B); x = Math.imul(x ^ x >>> 16, 0x45D9F3B); return (x ^ x >>> 16) >>> 0; };
+  return q.options.map((o, i) => i).sort((a, b) => key(a) - key(b));
+}
 function qHTML(q) {
-  if (q.type === 'mc') return `<p><b>${esc(q.prompt)}</b></p>${q.options.map((o, i) => `<label class="opt" style="display:flex;gap:8px;margin:3px 0"><input type="radio" name="tq" value="${i}"> <span>${esc(o)}</span></label>`).join('')}<button class="btn sm primary" id="qSubmit" style="margin-top:6px">Check answer</button>`;
+  if (q.type === 'mc') return `<p><b>${esc(q.prompt)}</b></p>${optOrder(q).map(i => { const o = q.options[i]; return `<label class="opt" style="display:flex;gap:8px;margin:3px 0"><input type="radio" name="tq" value="${i}"> <span>${esc(o)}</span></label>`; }).join('')}<button class="btn sm primary" id="qSubmit" style="margin-top:6px">Check answer</button>`;
   return `<p><b>${esc(q.prompt)}</b></p><div class="row"><input type="number" step="any" id="tqNum" style="width:110px;min-height:34px;border:1px solid var(--line);border-radius:7px;padding:4px 8px;background:var(--panel)" aria-label="${esc(q.prompt)}"> <span>${q.unit}</span><button class="btn sm primary" id="qSubmit">Check answer</button></div>`;
 }
 function submitQ(q) {
@@ -2370,7 +2400,10 @@ function submitQ(q) {
   if (q.type === 'mc') { const r = document.querySelector('input[name="tq"]:checked'); if (!r) { C.toast('Choose an answer first.'); return; } v = +r.value; }
   else { const raw = $('tqNum').value; if (raw === '') { C.toast('Enter a number first.'); return; } v = +raw; }
   const ok = q.type === 'mc' ? v === q.answer : Math.abs(v - q.answer) <= q.tol;
-  T.answered = { ok, explain: q.explain };
+  T.tries++;
+  // After a second wrong try, show the answer and explanation so the learner can move on.
+  T.answered = { ok, explain: q.explain, reveal: !ok && T.tries >= 2, answer: q.type === 'mc' ? q.options[q.answer] : '' };
+  if (T.answered.reveal) T.done = true;
   S.logAction('answer', { q: `L${T.li + 1}S${T.si + 1}`, value: v, correct: ok });
   if (ok) T.done = true;
   updateFb(); const n = $('tNext'); if (n) n.disabled = !T.done;
@@ -2378,7 +2411,9 @@ function submitQ(q) {
 function updateFb() {
   const st = LESSONS[T.li].steps[T.si], el = $('stepFb'); if (!el) return;
   let h = '';
-  if (st.q && T.answered) h = T.answered.ok ? `<div class="fb ok"><b>Correct.</b> ${esc(T.answered.explain)}</div>` : `<div class="fb no"><b>Not quite.</b> Look again at the monitor and try once more.</div>`;
+  if (st.q && T.answered) h = T.answered.ok ? `<div class="fb ok"><b>Correct.</b> ${esc(T.answered.explain)}</div>`
+    : T.answered.reveal ? `<div class="fb no"><b>The answer is: ${esc(T.answered.answer)}.</b> ${esc(T.answered.explain)}</div>`
+    : `<div class="fb no"><b>Not quite.</b> Look again at the monitor and try once more. (After a second try, the answer and explanation are shown.)</div>`;
   else if (st.check && T.done) h = `<div class="fb ok"><b>Done.</b> ${esc(st.ok || '')}</div>`;
   else if (st.check) h = '<div class="muted small" style="margin-top:6px">Waiting for you to do this on the pacemaker…</div>';
   if (el.innerHTML !== h) el.innerHTML = h;

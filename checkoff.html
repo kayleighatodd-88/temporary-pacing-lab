@@ -990,7 +990,7 @@ const CASES = [
   questions: [
     MC('q1', 'Pacing vs sensing', 'Right now, what is the pacemaker doing?', ['Pacing atrium and ventricle (AV sequential)', 'Sensing intrinsic atrial and ventricular activity and withholding output', 'Pacing the atrium only', 'Failing to capture'], 1,
       'The patient’s sinus rate is faster than the programmed lower rate, so every P wave and QRS is sensed and the pacemaker inhibits. “Paced at 100” is not the same as “being paced.”', 'Look at which indicators flash, and whether any spike precedes the P waves or QRS complexes.'),
-    NUM('q2', 'Rhythm', 'What is the patient’s intrinsic ventricular rate?', 140, 8, 'bpm', 'Intrinsic sinus rhythm at about 140 bpm with 1:1 conduction.', 'Freeze the monitor and use calipers on one R–R interval: rate = 60,000 ÷ interval (ms).'),
+    MC('q2', 'Rhythm', 'What is the patient’s intrinsic ventricular rate?', ['About 140 bpm', 'About 100 bpm', 'About 70 bpm', 'About 180 bpm'], 0, 'Intrinsic sinus rhythm at about 140 with 1:1 conduction. 100 is the programmed lower rate, and 70 is the junctional escape rate that would appear only if the sinus node failed.', 'Freeze the monitor and use calipers on one R–R interval: rate = 60,000 ÷ interval (ms).'),
     MC('q3', 'Pacing vs sensing', 'Which indicator pattern confirms your answer?', ['A SENSE and V SENSE flashing; no PACE lights', 'A PACE and V PACE flashing', 'V PACE only', 'No indicators at all'], 0,
       'Sense lights mean the device detected intrinsic activity. PACE lights mean a pulse was delivered (which still does not prove capture).')
   ],
@@ -1028,8 +1028,8 @@ const CASES = [
   device: { mode: 'AAI', rate: 120, aOut: 5, aSens: 0.5 },
   questions: [
     MC('q1', 'Rhythm', 'What is the rhythm?', ['Complete heart block with a junctional escape rhythm', 'Sinus rhythm with first-degree AV block', 'Junctional ectopic tachycardia', '2:1 AV block'], 0, 'P waves march through at their own rate; narrow QRS complexes occur at a slower independent rate. No consistent PR relationship.'),
-    NUM('q2', 'Rhythm', 'Atrial rate?', 145, 10, 'bpm', 'Sinus at about 145.', 'Measure P–P. The AEG trace makes atrial activity easier to see.'),
-    NUM('q3', 'Rhythm', 'Ventricular rate?', 55, 6, 'bpm', 'Junctional escape at about 55.'),
+    MC('q2', 'Rhythm', 'Atrial rate?', ['About 145 bpm', 'About 55 bpm', 'About 120 bpm', 'About 290 bpm'], 0, 'Sinus at about 145 (measure P–P). 55 is the junctional escape (ventricular) rate in complete block; 120 is the programmed AAI rate.', 'Measure P–P. The AEG trace makes atrial activity easier to see.'),
+    MC('q3', 'Rhythm', 'Ventricular rate?', ['About 55 bpm', 'About 145 bpm', 'About 120 bpm', 'About 30 bpm'], 0, 'Junctional escape at about 55. The P waves (about 145) do not conduct, so AAI pacing at 120 cannot reach the ventricles.'),
     MC('q4', 'Modes & AV synchrony', 'Why can’t AAI fix this?', ['Atrial impulses do not conduct to the ventricles, so atrial pacing cannot increase the ventricular rate', 'AAI output is limited to 5 mA', 'AAI cannot sense P waves', 'AAI only works below 100 ppm'], 0, 'In complete heart block nothing from the atrium reaches the ventricle. Ventricular pacing is required.')
   ],
   tasks: [
@@ -1048,7 +1048,7 @@ const CASES = [
   device: { mode: 'AAI', rate: 90, aOut: 1.6, aSens: 0.5 },
   questions: [
     MC('q1', 'Capture', 'What is happening?', ['Atrial loss of capture: spikes not followed by P waves', 'Atrial undersensing', 'Atrial oversensing', 'Normal AAI function'], 0, 'Atrial spikes appear on schedule but no paced P wave follows. Sinus P waves still occur and are sensed.'),
-    NUM('q2', 'Capture', 'Measured atrial stimulation threshold (lowest output with consistent 1:1 capture)?', 2.6, 0.2, 'mA', 'The simulated threshold is 2.6 mA.', 'Rate already exceeds the intrinsic rate. Increase output until capture, decrease until it is lost, then increase until consistent capture returns.'),
+    MC('q2', 'Capture', 'Measured atrial stimulation threshold (lowest output with consistent 1:1 capture)?', ['2.6 mA', '5.2 mA', '1.6 mA', '1.0 mA'], 0, 'The simulated threshold is 2.6 mA. 5.2 mA is twice the threshold (the least you then program), and 1.6 mA was the output that was losing capture.', 'Rate already exceeds the intrinsic rate. Increase output until capture, decrease until it is lost, then increase until consistent capture returns.'),
     MC('q3', 'Capture', 'Which output setting gives the margin described in the 5392 reference guide?', ['2.6 mA (equal to threshold)', '3.0 mA', '5.2–7.8 mA (2–3× threshold)', '20 mA for every patient'], 2, 'Medtronic advises an output at least 2 to 3 times the stimulation threshold. Your local protocol governs patient-specific settings.')
   ],
   tasks: [
@@ -1069,14 +1069,14 @@ const CASES = [
   questions: [
     MC('q1', 'Capture', 'What is the problem?', ['Ventricular loss of capture', 'Ventricular oversensing', 'Atrial undersensing', 'Upper rate behavior'], 0, 'Ventricular spikes follow sensed P waves on time, but no paced QRS follows. Only slow wide escape beats perfuse the patient.'),
     MC('q2', 'Safety & escalation', 'What comes first?', ['Increase V output right away to restore capture, then investigate', 'Perform a sensing threshold test', 'Turn the pacemaker off to see the underlying rhythm', 'Switch to AAI'], 0, 'In a pacing-dependent patient, restore effective ventricular capture immediately. Threshold testing comes after the patient is stable.'),
-    NUM('q3', 'Capture', 'Measured ventricular stimulation threshold?', 3.4, 0.2, 'mA', 'The simulated threshold is 3.4 mA.', 'Test quickly in a dependent patient and watch the arterial waveform.'),
+    MC('q3', 'Capture', 'Measured ventricular stimulation threshold?', ['3.4 mA', '6.8 mA', '2.0 mA', '1.5 mA'], 0, 'The simulated threshold is 3.4 mA. 6.8 mA is twice the threshold (what you program), and 2.0 mA was the output when capture was lost.', 'Test quickly in a dependent patient and watch the arterial waveform.'),
     MC('q4', 'Safety & escalation', 'Beyond the pacemaker settings, what is appropriate?', ['Notify the responsible provider/EP and have transcutaneous pacing and a defibrillator immediately available', 'No escalation needed once capture returns', 'Remove the pacing wires', 'Increase the atrial output only'], 0, 'Rising thresholds in a dependent patient warrant escalation and a backup plan: thresholds can keep rising and wires can fail.')
   ],
   tasks: [
     T('t1', 'Safety & escalation', 'Restore ventricular capture promptly (within 30 s for full credit).', 'Turn the V OUTPUT dial clockwise until each V spike produces a wide paced QRS and the arterial waveform improves.', S => { const f = H.firstTime(S, e => e.type === 'VP' && e.captured); return f == null ? 0 : f <= 30000 ? 1 : f <= 60000 ? 0.5 : 0.25; }),
     T('t2', 'Capture', 'Perform a ventricular threshold test (capture → loss → capture).', 'Decrease V output a step at a time until a spike has no QRS, then increase until 1:1 capture returns.', S => H.thresholdSweep(S, 'VP') ? 1 : 0),
     T('t3', 'Capture', 'Set final V output at least 2× the threshold.', '', S => S.d.vOut >= 2 * S.p.vThr ? 1 : S.d.vOut >= 1.5 * S.p.vThr ? 0.5 : 0),
-    T('t4', 'Safety & escalation', 'Arrange backup: escalate and/or bring transcutaneous pacing and a defibrillator to the bedside.', 'Use the bedside actions under the pacemaker.', S => (H.bedside(S, 'escalate') || H.bedside(S, 'defib')) ? 1 : 0)
+    T('t4', 'Safety & escalation', 'Arrange backup: escalate and/or bring transcutaneous pacing and a defibrillator to the bedside.', 'In the Bedside actions card next to the case, press “Escalate to provider / EP” and/or “Defibrillator / transcutaneous pacing ready”.', S => (H.bedside(S, 'escalate') || H.bedside(S, 'defib')) ? 1 : 0)
   ],
   debrief: '<p>Loss of ventricular capture in a patient with complete heart block is an emergency: the only perfusing rhythm is the escape rhythm (here ~38 bpm). Restore capture first (higher output, or Emergency DOO if needed), then measure the threshold and set at least a 2–3× margin. Electrical capture does not guarantee mechanical output: confirm with the arterial waveform or pulse oximetry.</p>'
 },
@@ -1089,7 +1089,7 @@ const CASES = [
   device: { mode: 'AAI', rate: 90, aOut: 5, aSens: 4 },
   questions: [
     MC('q1', 'Sensing', 'What is the problem?', ['Atrial undersensing', 'Atrial loss of capture', 'Atrial oversensing', 'Normal function'], 0, 'Intrinsic P waves are not sensed, so the pacemaker paces on its own schedule and competes with sinus rhythm. Some spikes capture, others fall in refractory atrium.'),
-    NUM('q2', 'Sensing', 'Atrial sensing threshold (least sensitive setting at which P waves are still sensed)?', 1.5, 0.3, 'mV', 'Sensing stops above 1.5 mV in this patient, so the sensing threshold is 1.5 mV.', 'With rate below intrinsic and output minimal, increase the mV number until A SENSE stops flashing, then decrease until it starts again.'),
+    MC('q2', 'Sensing', 'Atrial sensing threshold (least sensitive setting at which P waves are still sensed)?', ['1.5 mV', '0.7 mV', '4 mV', '0.5 mV'], 0, 'Sensing stops above 1.5 mV, so the threshold is 1.5 mV. Program half or less (0.7 mV or lower). 4 mV was the setting that caused the undersensing.', 'With rate below intrinsic and output minimal, increase the mV number until A SENSE stops flashing, then decrease until it starts again.'),
     MC('q3', 'Sensing', 'Which setting gives at least a 2:1 sensing safety margin?', ['3.0 mV', '1.5 mV', '0.7 mV or lower (half the threshold or less)', 'ASYNC'], 2, 'Set sensitivity to half (or less) of the threshold value in mV. Lower mV = more sensitive.'),
     MC('q4', 'Sensing', 'Changing A sensitivity from 4.0 mV to 0.5 mV makes the pacemaker…', ['More sensitive', 'Less sensitive', 'Pace with more energy', 'No different'], 0, 'The mV value is the smallest signal the device will recognize. A smaller number means smaller signals are detected: more sensitive.')
   ],
@@ -1129,8 +1129,8 @@ const CASES = [
   patient: { age: 'infant', rhythm: 'junctional', junctionalRate: 118, atrialRate: 96, av: 'intact', pr: 120, maxCond: 220, escape: 'none', aAmp: 2.4, vAmp: 8, aThr: 1.2, vThr: 1.8, conceal: 0.9 },
   device: { mode: 'AAI', rate: 140, aOut: 4, aSens: 0.5 },
   questions: [
-    NUM('q1', 'Rhythm', 'Intrinsic atrial rate?', 96, 8, 'bpm', 'Sinus P waves at about 96.', 'The AEG trace shows atrial activity clearly.'),
-    NUM('q2', 'Rhythm', 'Intrinsic ventricular rate?', 118, 8, 'bpm', 'Junctional rhythm at about 118.'),
+    MC('q1', 'Rhythm', 'Intrinsic atrial rate?', ['About 96 bpm', 'About 118 bpm', 'About 140 bpm', 'About 60 bpm'], 0, 'Sinus P waves at about 96. 118 is the junctional rhythm, and 140 is the programmed AAI rate.', 'The AEG trace shows atrial activity clearly.'),
+    MC('q2', 'Rhythm', 'Intrinsic ventricular rate?', ['About 118 bpm', 'About 96 bpm', 'About 140 bpm', 'About 60 bpm'], 0, 'Junctional rhythm at about 118, faster than the sinus rate (about 96), so the ventricles follow the junction.'),
     MC('q3', 'Rhythm', 'Underlying rhythm?', ['Junctional (accelerated junctional) rhythm with AV dissociation', 'Sinus rhythm', 'Complete heart block', 'Atrial flutter'], 0, 'Narrow QRS complexes faster than, and independent of, the sinus P waves.'),
     MC('q4', 'Rhythm', 'Is antegrade AV conduction present?', ['Yes: atrial-paced beats conduct with a constant PR', 'No: complete AV block', 'Cannot be judged', 'Only retrograde'], 0, 'When the atrium is paced faster than the junction, each paced P conducts. Dissociation here is from a competing junctional focus, not block.'),
     MC('q5', 'Rhythm', 'Is the patient pacing-dependent?', ['No: an adequate intrinsic rhythm appears', 'Yes: no intrinsic rhythm', 'Yes, because the rhythm is junctional', 'Cannot tell'], 0, 'A junctional rhythm at 118 is present when pacing is withdrawn, though AV synchrony is lost.')
@@ -1172,7 +1172,7 @@ const CASES = [
   device: { mode: 'DDI', rate: 60, aOut: 10, vOut: 10, aSens: 0.5, vSens: 2 },
   questions: [
     MC('q1', 'Rhythm', 'Rhythm?', ['Atrial flutter / IART with 2:1 AV conduction', 'Sinus tachycardia', 'JET', 'Atrial fibrillation'], 0, 'Regular atrial activity near 280 with every second beat conducted.'),
-    NUM('q2', 'Rhythm', 'Atrial rate?', 280, 20, 'bpm', 'About 280.', 'Use the AEG and calipers on consecutive atrial deflections.'),
+    MC('q2', 'Rhythm', 'Atrial rate?', ['About 280 bpm', 'About 140 bpm', 'About 72 bpm', 'About 350 bpm'], 0, 'About 280 on the atrial ECG. The ventricular rate is about 140 because of 2:1 AV conduction.', 'Use the AEG and calipers on consecutive atrial deflections.'),
     MC('q3', 'Safety & escalation', 'Before delivering RAP, what must you verify?', ['The atrial wires are connected to the atrial channel (not the ventricle) and a defibrillator is immediately available', 'V output is at maximum', 'Pause is held', 'Nothing'], 0, 'The 5392 guide: RAP is for atrial use only; verify atrial lead placement and connection; have defibrillation equipment immediately available.'),
     MC('q4', 'Overdrive & RAP', 'What outcomes are possible after RAP?', ['Termination, no effect, acceleration, or degeneration to atrial fibrillation', 'It always terminates flutter', 'It is the same as atrial pacing for JET', 'It cannot affect the ventricles'], 0, 'RAP may interrupt some atrial tachycardias but can also induce, accelerate or degenerate them.')
   ],
@@ -1198,8 +1198,8 @@ const CASES = [
   ],
   tasks: [
     T('t1', 'Troubleshooting', 'Check and reseat the connections.', 'Bedside actions → Reseat connections.', S => H.bedside(S, 'reseat') ? 1 : 0),
-    T('t2', 'Safety & escalation', 'Escalate to the responsible provider / EP.', 'Bedside actions.', S => H.bedside(S, 'escalate') ? 1 : 0),
-    T('t3', 'Safety & escalation', 'Have transcutaneous pacing and a defibrillator available.', 'Bedside actions.', S => H.bedside(S, 'defib') ? 1 : 0),
+    T('t2', 'Safety & escalation', 'Escalate to the responsible provider / EP.', 'In the Bedside actions card next to the case, press “Escalate to provider / EP”.', S => H.bedside(S, 'escalate') ? 1 : 0),
+    T('t3', 'Safety & escalation', 'Have transcutaneous pacing and a defibrillator available.', 'In the Bedside actions card next to the case, press “Defibrillator / transcutaneous pacing ready”.', S => H.bedside(S, 'defib') ? 1 : 0),
     T('t4', 'Troubleshooting', 'Confirm stable ventricular capture afterward (10 consecutive captured V pulses, no open-circuit events in 10 s).', '', S => { const r = H.recent(S, 10000); return (H.capturedStreak(S, 'VP').cur >= 10 && !r.some(e => e.type === 'VP' && e.reason === 'open')) ? 1 : 0; })
   ],
   debrief: '<p>Pacing system problems include loose connections, cable damage, lead fracture and dislodgement. Clues: PACE indicator without a spike (open circuit), spikes without capture despite generous output, and artifact that is oversensed. Settings changes may mask a hardware problem without fixing it. Follow wires from patient to pacemaker, check for crossed atrial and ventricular connections, and escalate.</p><p>Instructors can switch the wire to “fractured” (reseating does not help) or “dislodged.”</p>'
@@ -1820,7 +1820,7 @@ const BEDSIDE = {
   family: 'Explain procedure to child and family', equipment: 'Gather equipment and supplies', secure: 'Secure pacemaker (IV pole / strap)', disconnect: 'Disconnect cable from pacing wires'
 };
 function renderBedside() {
-  $('bedsideBtns').innerHTML = APP.bedside.map(k => `<button class="btn sm" data-bedside="${k}">${BEDSIDE[k]}</button>`).join('');
+  $('bedsideBtns').innerHTML = APP.bedside.map(k => `<button class="btn sm" id="bs_${k}" data-bedside="${k}">${BEDSIDE[k]}</button>`).join('');
   $('bedsideBtns').querySelectorAll('[data-bedside]').forEach(b => b.addEventListener('click', () => bedsideAction(b.dataset.bedside)));
 }
 function bedsideAction(kind) {
