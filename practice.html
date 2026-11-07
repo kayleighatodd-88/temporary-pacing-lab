@@ -4,22 +4,22 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;500;700;800&display=swap" rel="stylesheet">
 <title>Temporary Pacing Lab: Practice</title>
 <style>
 :root{
   --bg:#F5F3EE; --panel:#FFFFFF; --panel2:#FAF9F6; --ink:#333F48; --muted:#5C6770; --line:#D6D2C4;
-  --navy:#333F48; --orange:#BF5700; --on-accent:#FFFFFF; --good:#2E7D57; --amber:#A86400; --red:#B3261E; --chip:#ECE9E1; --focus:#BF5700;
+  --navy:#333F48; --orange:#A57A00; --on-accent:#FFFFFF; --good:#2E7D57; --amber:#A86400; --red:#B3261E; --chip:#ECE9E1; --focus:#A57A00;
   --hdr:#333F48; --hdr-ink:#FFFFFF; --hdr-muted:#D6D2C4;
-  --sans:"Libre Franklin", Arial, "Helvetica Neue", Helvetica, system-ui, sans-serif;
+  --sans:"Atkinson Hyperlegible Next", Arial, "Helvetica Neue", Helvetica, system-ui, sans-serif;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --bg:#161B20; --panel:#20272E; --panel2:#272F37; --ink:#ECEAE4; --muted:#A7AEB4; --line:#38424B; --navy:#D6D2C4; --orange:#F8971F; --on-accent:#161B20; --good:#5CC48F; --amber:#E5A94B; --red:#F07A70; --chip:#2E3740; --focus:#F8971F; --hdr:#0F1418; --hdr-ink:#FFFFFF; --hdr-muted:#D6D2C4; color-scheme:dark;
+    --bg:#161B20; --panel:#20272E; --panel2:#272F37; --ink:#ECEAE4; --muted:#A7AEB4; --line:#38424B; --navy:#D6D2C4; --orange:#F2C230; --on-accent:#161B20; --good:#5CC48F; --amber:#E5A94B; --red:#F07A70; --chip:#2E3740; --focus:#F2C230; --hdr:#0F1418; --hdr-ink:#FFFFFF; --hdr-muted:#D6D2C4; color-scheme:dark;
   }
 }
-:root[data-theme="dark"]{ --bg:#161B20; --panel:#20272E; --panel2:#272F37; --ink:#ECEAE4; --muted:#A7AEB4; --line:#38424B; --navy:#D6D2C4; --orange:#F8971F; --on-accent:#161B20; --good:#5CC48F; --amber:#E5A94B; --red:#F07A70; --chip:#2E3740; --focus:#F8971F; --hdr:#0F1418; --hdr-ink:#FFFFFF; --hdr-muted:#D6D2C4; color-scheme:dark; }
+:root[data-theme="dark"]{ --bg:#161B20; --panel:#20272E; --panel2:#272F37; --ink:#ECEAE4; --muted:#A7AEB4; --line:#38424B; --navy:#D6D2C4; --orange:#F2C230; --on-accent:#161B20; --good:#5CC48F; --amber:#E5A94B; --red:#F07A70; --chip:#2E3740; --focus:#F2C230; --hdr:#0F1418; --hdr-ink:#FFFFFF; --hdr-muted:#D6D2C4; color-scheme:dark; }
 :root{ box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); }
 html{ scroll-padding-top:env(safe-area-inset-top,0px); }
 *,*::before,*::after{ box-sizing:inherit; }
@@ -31,15 +31,15 @@ button,select,input,textarea{ font:inherit; color:inherit; }
 a{ color:var(--navy); }
 
 /* header */
-.top{ background:var(--hdr); border-bottom:4px solid #BF5700; padding:12px 20px; display:flex; flex-wrap:wrap; gap:10px 24px; align-items:center; justify-content:space-between; }
+.top{ background:var(--hdr); border-bottom:4px solid #A57A00; padding:12px 20px; display:flex; flex-wrap:wrap; gap:10px 24px; align-items:center; justify-content:space-between; }
 .top h1{ margin:0; font-size:22px; color:var(--hdr-ink); font-weight:800; letter-spacing:-.01em; }
 .top .sub{ margin:2px 0 0; font-size:13.5px; color:var(--hdr-muted); }
 .toolnav{ display:flex; gap:6px; flex-wrap:wrap; }
 .toolnav a, .toolnav span{ padding:7px 14px; border-radius:8px; border:1px solid var(--line); text-decoration:none; font-weight:700; font-size:14px; color:var(--hdr-ink); background:transparent; border-color:rgba(214,210,196,.45); }
-.toolnav a:hover{ border-color:#F8971F; }
-.toolnav span[aria-current]{ background:#BF5700; color:#FFFFFF; border-color:#BF5700; }
+.toolnav a:hover{ border-color:#F2C230; }
+.toolnav span[aria-current]{ background:#A57A00; color:#FFFFFF; border-color:#A57A00; }
 .top .btn{ background:transparent; color:var(--hdr-ink); border-color:rgba(214,210,196,.45); }
-.top .btn:hover{ border-color:#F8971F; }
+.top .btn:hover{ border-color:#F2C230; }
 .disclaimer{ padding:7px 20px; font-size:13px; color:var(--muted); background:var(--panel); border-bottom:1px solid var(--line); }
 .disclaimer b{ color:var(--ink); }
 footer.foot{ padding:14px 20px 26px; color:var(--muted); font-size:13px; text-align:center; }
@@ -107,7 +107,7 @@ footer.foot{ padding:14px 20px 26px; color:var(--muted); font-size:13px; text-al
 .ekey{ width:52px; height:34px; border-radius:9px; border:2px solid #4A545E; background:linear-gradient(180deg,#F7F8F9,#DEE2E5); display:grid; place-items:center; cursor:pointer; box-shadow:0 2px 0 #8A939B; padding:0; touch-action:none; }
 .ekey svg{ display:block; }
 .ekey:active, .ekey.held{ transform:translateY(2px); box-shadow:none; background:#C9CFD4; }
-.ekey.held{ outline:3px solid #BF5700; }
+.ekey.held{ outline:3px solid #A57A00; }
 .ekey.doo{ width:66px; height:32px; justify-self:center; }
 .ekey.round{ width:46px; height:40px; border-radius:50%; }
 .edial{ touch-action:none; cursor:grab; border-radius:50%; display:block; }
@@ -252,10 +252,34 @@ dialog::backdrop{ background:rgba(5,12,20,.5); }
 .toast{ background:var(--navy); color:var(--panel); padding:8px 14px; border-radius:9px; font-size:14px; box-shadow:0 6px 18px rgba(0,0,0,.25); max-width:90vw; }
 .sr{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); }
 </style>
+<style id="paa-theme">
+/* PAA-THEME:BEGIN — generated by pediatric-app-academy/tools/reskin.py */
+:root{--bg:#F4F5F6;--panel:#FFFFFF;--panel2:#F9FAFA;--ink:#232A30;--muted:#5A646C;--line:#DADFE3;--navy:#232A30;--orange:#232A30;--on-accent:#FFFFFF;--good:#2A7347;--amber:#9A5F00;--red:#B3261E;--chip:#E6E9EC;--focus:#232A30;--hdr:#232A30;--hdr-ink:#F4F5F6;--hdr-muted:#AEB8C1;--sans:"Atkinson Hyperlegible Next", "Segoe UI", "Helvetica Neue", Arial, sans-serif;--paa-deep:#232A30;--paa-deep-ink:#F4F5F6;--paa-deep-muted:#AEB8C1;--paa-hl:#F2C230;--paa-hl-deep:#A57A00;--paa-ink:#232A30;--paa-line:#DADFE3;--paa-action:#232A30;--paa-on-action:#FFFFFF;}@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#14191E;--panel:#1C232A;--panel2:#232B33;--ink:#E8ECEF;--muted:#9FAAB4;--line:#313B45;--navy:#E8ECEF;--orange:#F2C230;--on-accent:#14191E;--good:#6FCF97;--amber:#F2B84B;--red:#FF8A80;--chip:#2A3239;--focus:#F2C230;--hdr:#26313B;--hdr-ink:#F4F5F6;--hdr-muted:#AEB8C1;--paa-deep:#26313B;--paa-deep-ink:#F4F5F6;--paa-deep-muted:#AEB8C1;--paa-hl:#F2C230;--paa-hl-deep:#F2C230;--paa-ink:#E8ECEF;--paa-line:#313B45;--paa-action:#F2C230;--paa-on-action:#14191E;}}:root[data-theme="dark"]{--bg:#14191E;--panel:#1C232A;--panel2:#232B33;--ink:#E8ECEF;--muted:#9FAAB4;--line:#313B45;--navy:#E8ECEF;--orange:#F2C230;--on-accent:#14191E;--good:#6FCF97;--amber:#F2B84B;--red:#FF8A80;--chip:#2A3239;--focus:#F2C230;--hdr:#26313B;--hdr-ink:#F4F5F6;--hdr-muted:#AEB8C1;--paa-deep:#26313B;--paa-deep-ink:#F4F5F6;--paa-deep-muted:#AEB8C1;--paa-hl:#F2C230;--paa-hl-deep:#F2C230;--paa-ink:#E8ECEF;--paa-line:#313B45;--paa-action:#F2C230;--paa-on-action:#14191E;}
+/* --- Academy chrome --- */
+body{font-family:"Atkinson Hyperlegible Next", "Segoe UI", "Helvetica Neue", Arial, sans-serif;font-variant-numeric:tabular-nums}
+h1,h2,h3,h4{font-family:"Atkinson Hyperlegible Next", "Segoe UI", "Helvetica Neue", Arial, sans-serif;letter-spacing:-.01em}
+.top,.topbar{background:var(--paa-deep)!important;border-bottom:3px solid var(--paa-hl)!important;color:var(--paa-deep-ink)}
+.top h1,.topbar h1,.brand h1{font-family:"Atkinson Hyperlegible Next", "Segoe UI", "Helvetica Neue", Arial, sans-serif!important;font-weight:800}
+.paa-home{display:inline-flex;align-items:center;gap:10px;color:var(--paa-deep-ink)!important;text-decoration:none;padding:4px 16px 4px 0;margin-right:4px;border-right:1px solid rgba(244,245,246,.22);flex:none;line-height:1}
+.paa-home svg{width:30px;height:30px;flex:none}
+.paa-home .t{display:flex;flex-direction:column}
+.paa-home small{font-size:11px;font-weight:500;color:var(--paa-deep-muted)}
+.paa-home b{font-size:16px;font-weight:800;letter-spacing:-.01em;margin-top:2px}
+.paa-home:hover b{text-decoration:underline;text-decoration-color:var(--paa-hl);text-decoration-thickness:2px;text-underline-offset:3px}
+.paa-hdr{display:flex;align-items:center;gap:14px;min-width:0}
+.toolnav a,.toolnav span,.top nav a,.sibs a{border-radius:6px!important}
+.toolnav a:hover,.top nav a:hover{border-color:var(--paa-hl)!important}
+.toolnav span[aria-current],.toolnav a[aria-current],.top nav a[aria-current=page],.sibs a[aria-current="page"]{background:var(--paa-hl)!important;color:#232A30!important;border-color:var(--paa-hl)!important;opacity:1}
+.brand>svg{display:none}
+:focus-visible{outline-color:var(--paa-action)}
+@media (max-width:640px){.paa-home .t{display:none}.paa-home{padding-right:10px}}
+
+/* PAA-THEME:END */
+</style>
 </head>
 <body>
 <header class="top">
-  <div><h1>Temporary Pacing Lab</h1><p class="sub" id="toolSub">Practice: cases and randomized patients for daily checks and RAP</p></div>
+  <div class="paa-hdr"><span class="paa-slot"></span><!--paa-home--><a class="paa-home" href="https://kayleighatodd-88.github.io/pediatric-app-academy/" aria-label="Pediatric APP Academy home"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 42 L24 6 L40 42" fill="none" stroke="#F4F5F6" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/><path d="M12.5 30 H19.5 L21.75 24 L25 36 L27.25 30 H35.5" fill="none" stroke="#F2C230" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/></svg><span class="t"><small>The Pediatric</small><b>APP Academy</b></span></a><!--/paa-home--><div><h1>Temporary Pacing Lab</h1><p class="sub" id="toolSub">Practice: cases and randomized patients for daily checks and RAP</p></div></div>
   <nav class="toolnav" aria-label="Pacing lab tools" id="toolNav"></nav>
 </header>
 <div class="disclaimer"><b>Educational simulation only.</b> Not connected to a medical device. Does not replace manufacturer instructions, local clinical policies, expert supervision, or patient-specific clinical judgment. Device controls are modeled on the Medtronic 5392 reference guide; this is not Medtronic software.</div>
@@ -265,7 +289,7 @@ dialog::backdrop{ background:rgba(5,12,20,.5); }
     <section class="epg" id="pacer" aria-label="Simulated Medtronic 5392-style dual-chamber temporary pacemaker">
       <div class="epg-sockets" aria-hidden="true"><div class="a" data-l="A"></div><div class="v" data-l="V"></div></div>
       <div class="epg-shell">
-        <div class="epg-r1"><button class="ekey doo" id="kDOO" aria-label="DOO emergency key"><svg width="54" height="18" viewBox="0 0 54 18"><path d="M9 2 17 16H1Z" fill="none" stroke="#26313B" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 7v4M9 13v1" stroke="#26313B" stroke-width="1.6"/><text x="21" y="14" font-family="Libre Franklin, Arial, sans-serif" font-weight="700" font-size="12" fill="#26313B">DOO</text></svg></button>
+        <div class="epg-r1"><button class="ekey doo" id="kDOO" aria-label="DOO emergency key"><svg width="54" height="18" viewBox="0 0 54 18"><path d="M9 2 17 16H1Z" fill="none" stroke="#26313B" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 7v4M9 13v1" stroke="#26313B" stroke-width="1.6"/><text x="21" y="14" font-family="Atkinson Hyperlegible Next, Arial, sans-serif" font-weight="700" font-size="12" fill="#26313B">DOO</text></svg></button>
           <button class="ekey" id="kOnOff" aria-label="On/off key"><svg width="20" height="20" viewBox="0 0 20 20"><path d="M6 4.5a7 7 0 1 0 8 0" fill="none" stroke="#26313B" stroke-width="2" stroke-linecap="round"/><path d="M10 2v8" stroke="#26313B" stroke-width="2" stroke-linecap="round"/></svg></button></div>
         <div class="epg-grid">
           <div class="lcd lcd-u" id="lcdU">
@@ -1596,7 +1620,7 @@ function renderStrip(ctx, W, H, tEnd, o) {
     ctx.beginPath(); ctx.moveTo(x, baseII + 3); ctx.lineTo(x, baseII - hgt); ctx.stroke();
   });
   // labels
-  ctx.font = '600 12px "Libre Franklin", Arial, sans-serif'; ctx.textAlign = 'center';
+  ctx.font = '600 12px "Atkinson Hyperlegible Next", Arial, sans-serif'; ctx.textAlign = 'center';
   ctx.fillStyle = COL.text; ctx.textAlign = 'left'; ctx.fillText('II', 8, laneII.y + 15); ctx.textAlign = 'center';
   if (o.events) {
     const aLab = { sinus: 'P', paced: 'pP', tach: 'F' }, vLab = { conducted: 'R', junctional: 'J', escapeJ: 'JE', escapeV: 'VE', pvc: 'PVC', paced: 'V', fusion: 'Fu' };
@@ -1608,7 +1632,7 @@ function renderStrip(ctx, W, H, tEnd, o) {
       ctx.fillStyle = COL.warn; ctx.fillText(e.reason === 'pseudofusion' ? 'ps' : '✕', x, baseII - hgt - 4);
     });
     // device markers
-    ctx.font = '600 11px "Libre Franklin", Arial, sans-serif';
+    ctx.font = '600 11px "Atkinson Hyperlegible Next", Arial, sans-serif';
     evs.filter(e => e.type === 'MK' && e.code !== 'INH').forEach(e => {
       const x = (e.t - tStart) * pxPerMs; if (x < 8 || x > W - 8) return;
       const fake = e.src === 'noise' || e.src === 'T' || e.src === 'artifact';
@@ -1662,7 +1686,7 @@ function renderStrip(ctx, W, H, tEnd, o) {
     const ms = (x2 - x1) / pxPerMs;
     if (ms > 20) {
       const txt = `${Math.round(ms)} ms · ${Math.round(60000 / ms)}/min`;
-      ctx.font = '600 13px "Libre Franklin", Arial, sans-serif'; const tw = ctx.measureText(txt).width + 12;
+      ctx.font = '600 13px "Atkinson Hyperlegible Next", Arial, sans-serif'; const tw = ctx.measureText(txt).width + 12;
       const bx = clamp((x1 + x2) / 2 - tw / 2, 2, W - tw - 2);
       ctx.fillStyle = 'rgba(10,22,32,.9)'; ctx.fillRect(bx, 6, tw, 22); ctx.fillStyle = '#FFE38A'; ctx.textAlign = 'left'; ctx.fillText(txt, bx + 6, 22);
     }
@@ -1733,8 +1757,8 @@ function fenceSVG(ch) {
   return `<svg viewBox="0 0 ${W} ${H + 18}" role="img" aria-label="${esc((A ? 'Atrial' : 'Ventricular') + ' channel: ' + label)}">
     <rect width="${W}" height="${base}" fill="#E6F1F8"/><rect y="${base}" width="${W}" height="${H - base + 18}" fill="#D6E3C6"/>
     ${grass}${tree(60, amp)}${bushes(115)}${tree(180, amp)}${bushes(235)}${tree(290, amp)}${fence}
-    <text x="8" y="14" font-family="Libre Franklin, Arial, sans-serif" font-size="12" font-weight="700" fill="#333F48">${A ? 'Atrial channel' : 'Ventricular channel'}</text>
-    <text x="8" y="${H + 12}" font-family="Libre Franklin, Arial, sans-serif" font-size="11.5" fill="${over ? '#8A3E00' : seen ? '#1D5A3C' : '#8A3E00'}">${esc(over ? `fence ${fmtSens(set)} mV is low enough to see ${bush >= set ? 'T waves (bushes)' : 'noise (grass)'}: oversensing` : label)}</text></svg>`;
+    <text x="8" y="14" font-family="Atkinson Hyperlegible Next, Arial, sans-serif" font-size="12" font-weight="700" fill="#333F48">${A ? 'Atrial channel' : 'Ventricular channel'}</text>
+    <text x="8" y="${H + 12}" font-family="Atkinson Hyperlegible Next, Arial, sans-serif" font-size="11.5" fill="${over ? '#8A3E00' : seen ? '#1D5A3C' : '#8A3E00'}">${esc(over ? `fence ${fmtSens(set)} mV is low enough to see ${bush >= set ? 'T waves (bushes)' : 'noise (grass)'}: oversensing` : label)}</text></svg>`;
 }
 function renderFence() { if ($('fenceCard').hidden) return; $('fenceA').innerHTML = fenceSVG('A'); $('fenceV').innerHTML = fenceSVG('V'); }
 const PICKET_COLORS = ['#FFB4A2', '#FFD6A5', '#B9E4C9', '#A0C4FF', '#CDB4DB'];
@@ -1755,7 +1779,7 @@ function fenceExplainer() {
     const mouth = mood === 'happy' ? '<path d="M26 141q6 6 12 0" fill="none" stroke="#1E2A36" stroke-width="1.6" stroke-linecap="round"/>'
       : mood === 'dizzy' ? '<circle cx="32" cy="144" r="2.6" fill="none" stroke="#1E2A36" stroke-width="1.5"/>'
       : '<path d="M27 144q2.5-2 5 0t5 0" fill="none" stroke="#1E2A36" stroke-width="1.5" stroke-linecap="round"/>';
-    const bubble = mood === 'confused' ? '<text x="58" y="138" font-size="18" font-weight="700" font-family="Libre Franklin, Arial, sans-serif" fill="#BF5700">?</text>' : mood === 'dizzy' ? '<text x="58" y="138" font-size="18" font-weight="700" font-family="Libre Franklin, Arial, sans-serif" fill="#BF5700">!</text>' : '<path d="M56 130l3 3 6-7" fill="none" stroke="#2E7D57" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>';
+    const bubble = mood === 'confused' ? '<text x="58" y="138" font-size="18" font-weight="700" font-family="Atkinson Hyperlegible Next, Arial, sans-serif" fill="#A57A00">?</text>' : mood === 'dizzy' ? '<text x="58" y="138" font-size="18" font-weight="700" font-family="Atkinson Hyperlegible Next, Arial, sans-serif" fill="#A57A00">!</text>' : '<path d="M56 130l3 3 6-7" fill="none" stroke="#2E7D57" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>';
     return `<rect x="14" y="123" width="36" height="32" rx="6" fill="#D7DCE1" stroke="#4A545E" stroke-width="1.3"/><rect x="19" y="120" width="7" height="4" fill="#2F6FD6"/><rect x="38" y="120" width="7" height="4" fill="#fff" stroke="#4A545E" stroke-width=".6"/><rect x="19" y="128" width="26" height="22" rx="3" fill="#EAF4EF"/>${eyes}${mouth}${bubble}`;
   };
   const panel = (top, mood, hidden, title, text, tag, cls, alt) => `<figure>
@@ -1764,8 +1788,8 @@ function fenceExplainer() {
       <path d="${ecg}" fill="none" stroke="#333F48" stroke-width="3.2" stroke-linejoin="round"/>
       ${pickets(200, top, B, 16)}
       ${hidden ? `<path d="M68 123L80 26L92 126" fill="none" stroke="#333F48" stroke-width="1.6" stroke-dasharray="4 3" opacity=".45"/>` : ''}
-      <text x="80" y="${hidden ? 10 : 18}" text-anchor="middle" font-size="12" font-weight="700" font-family="Libre Franklin, Arial, sans-serif" fill="#333F48">QRS${hidden ? ' (hidden)' : ''}</text>
-      ${top > 94 ? '<text x="144" y="84" text-anchor="middle" font-size="11" font-weight="700" font-family="Libre Franklin, Arial, sans-serif" fill="#333F48">T wave</text>' : ''}
+      <text x="80" y="${hidden ? 10 : 18}" text-anchor="middle" font-size="12" font-weight="700" font-family="Atkinson Hyperlegible Next, Arial, sans-serif" fill="#333F48">QRS${hidden ? ' (hidden)' : ''}</text>
+      ${top > 94 ? '<text x="144" y="84" text-anchor="middle" font-size="11" font-weight="700" font-family="Atkinson Hyperlegible Next, Arial, sans-serif" fill="#333F48">T wave</text>' : ''}
       ${face(mood)}
     </svg>
     <figcaption><b>${title}</b>${text}<br><span class="tag ${cls}">${tag}</span></figcaption></figure>`;
@@ -1843,7 +1867,7 @@ function bedsideAction(kind) {
 // Frontal view of a child's chest: the patient's right is on the viewer's left. In 'teach' mode the heart and
 // labels are shown; otherwise only the skin exit sites are drawn so the diagram does not give away the answer.
 function chestSVG(cfg) {
-  const teach = cfg.mode === 'teach', bip = cfg.kind === 'bipolar', F = 'font-family="Libre Franklin, Arial, sans-serif"';
+  const teach = cfg.mode === 'teach', bip = cfg.kind === 'bipolar', F = 'font-family="Atkinson Hyperlegible Next, Arial, sans-serif"';
   const coil = (x1, y1, x2, y2) => {
     const dx = x2 - x1, dy = y2 - y1, L = Math.hypot(dx, dy), nx = -dy / L, ny = dx / L; let d = '';
     for (let i = 0; i <= 60; i++) { const f = i / 60, o = Math.sin(f * Math.PI * 14) * 4 * Math.min(1, f * 8, (1 - f) * 8); d += `${i ? 'L' : 'M'}${(x1 + dx * f + nx * o).toFixed(1)} ${(y1 + dy * f + ny * o).toFixed(1)}`; }
@@ -1878,7 +1902,7 @@ function chestSVG(cfg) {
     <rect x="149" y="271" width="36" height="22" rx="2" fill="#D3DCD8" stroke="#4A545E"/><rect x="149" y="298" width="36" height="18" rx="2" fill="#D3DCD8" stroke="#4A545E"/>
     <circle cx="203" cy="281" r="7" fill="#3A4048"/><circle cx="203" cy="303" r="7" fill="#3A4048"/>
     <text x="180" y="226" text-anchor="middle" font-size="10" ${F} fill="#8A5A47">sternum</text>
-    <text x="112" y="214" text-anchor="end" font-size="12" font-weight="700" ${F} fill="#BF5700">Pair 1</text>${bip ? `<text x="248" y="214" font-size="12" font-weight="700" ${F} fill="#BF5700">Pair 2</text>` : ''}
+    <text x="112" y="214" text-anchor="end" font-size="12" font-weight="700" ${F} fill="#A57A00">Pair 1</text>${bip ? `<text x="248" y="214" font-size="12" font-weight="700" ${F} fill="#A57A00">Pair 2</text>` : ''}
     </g>
     ${teach
       ? `${lbl(10, 52, 'start', 'Atrial wires', 'right atrium')}${lead(56, 72, 172, 196)}
@@ -1984,7 +2008,7 @@ $('repCopy').addEventListener('click', async () => {
   catch (e) { const r = document.createRange(); r.selectNodeContents($('repBody')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); toast('Text selected. Press Ctrl/Cmd+C to copy.'); }
 });
 $('repClose').addEventListener('click', () => $('reportDlg').close());
-function wrapStandalone(title, body) { return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>${esc(title)}</title><link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;600;700&display=swap" rel="stylesheet"><style>body{font-family:"Libre Franklin",Arial,Helvetica,sans-serif;max-width:900px;margin:24px auto;padding:0 16px;color:#333F48;line-height:1.45}h1{color:#BF5700;font-size:22px}h2,h3{color:#333F48}table{border-collapse:collapse;width:100%;font-size:13.5px}td,th{border:1px solid #ccd;padding:5px 6px;text-align:left;vertical-align:top}th{background:#F5F3EE}.res-yes{color:#2E7D57;font-weight:700}.res-no{color:#B3261E;font-weight:700}</style></head><body>${body}</body></html>`; }
+function wrapStandalone(title, body) { return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>${esc(title)}</title><link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;600;700&display=swap" rel="stylesheet"><style>body{font-family:"Atkinson Hyperlegible Next",Arial,Helvetica,sans-serif;max-width:900px;margin:24px auto;padding:0 16px;color:#333F48;line-height:1.45}h1{color:#A57A00;font-size:22px}h2,h3{color:#333F48}table{border-collapse:collapse;width:100%;font-size:13.5px}td,th{border:1px solid #ccd;padding:5px 6px;text-align:left;vertical-align:top}th{background:#F5F3EE}.res-yes{color:#2E7D57;font-weight:700}.res-no{color:#B3261E;font-weight:700}</style></head><body>${body}</body></html>`; }
 
 /* ---------- toolbar ---------- */
 const toggle = (id, key, after) => $(id).addEventListener('click', () => { if ($(id).disabled) return; APP[key] = !APP[key]; $(id).setAttribute('aria-pressed', String(APP[key])); after && after(); });
